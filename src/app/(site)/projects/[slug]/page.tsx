@@ -28,28 +28,42 @@ export default async function ProjectPage({
   return (
     <article className="flow">
       <p>
-        <Link href="/projects">← All projects</Link>
+        <Link href="/projects" className="text-link">
+          All projects
+        </Link>
       </p>
-      <h1>
+      <h1 className="page-title">
         {project.title}
-        {project.draft && <span className="badge">Draft</span>}
+        {project.draft && <span className="badge-draft">Draft</span>}
       </h1>
-      <p>{project.description}</p>
+      <p className="lede">{project.description}</p>
       {project.tags.length > 0 && (
-        <ul className="link-list text-muted">
+        <ul className="pill-list">
           {project.tags.map((tag) => (
-            <li key={tag}>{tag}</li>
+            <li key={tag} className="pill pill--slate">
+              {tag}
+            </li>
           ))}
         </ul>
       )}
       {project.links.length > 0 && (
-        <ul className="link-list">
+        <div className="btn-row">
           {project.links.map((link) => (
-            <li key={link.href}>
-              <a href={link.href}>{link.label}</a>
-            </li>
+            <a
+              key={link.href}
+              href={link.href}
+              className={
+                link.kind === "live"
+                  ? "btn btn--primary"
+                  : "btn btn--outline"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.kind === "live" ? "Visit site" : "View on GitHub"}
+            </a>
           ))}
-        </ul>
+        </div>
       )}
     </article>
   );

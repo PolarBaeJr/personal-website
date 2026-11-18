@@ -26,10 +26,12 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
   return (
     <article className="flow">
       <p>
-        <Link href="/blog">← All posts</Link>
+        <Link href="/blog" className="text-link">
+          All posts
+        </Link>
       </p>
-      <h1>{post.title}</h1>
-      <time dateTime={post.date} className="text-muted">
+      <h1 className="page-title">{post.title}</h1>
+      <time dateTime={post.date} className="text-slate">
         {post.date}
       </time>
       <div

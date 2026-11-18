@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import { Instrument_Sans } from "next/font/google";
 import { site } from "@/content/site";
 import "./globals.css";
+
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-instrument",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -14,12 +19,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
-      <body>
-        <SiteHeader />
-        <main className="site-main site-width">{children}</main>
-        <SiteFooter />
-      </body>
+    <html lang="en" className={instrumentSans.variable}>
+      <body>{children}</body>
     </html>
   );
 }

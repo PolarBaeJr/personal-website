@@ -16,15 +16,21 @@ npm run lint
 
 | What | Where |
 | --- | --- |
-| Name, tagline, about, email, social links | `src/content/site.ts` (`site`) |
-| Navigation | `src/content/site.ts` (`nav`) — add a line plus its route folder in `src/app/` |
-| Projects | `src/content/projects.ts` (set `draft: false` when ready) |
-| Résumé content | `src/content/resume.ts` |
-| Résumé PDF | `public/resume.pdf` (served at `/resume.pdf`) |
+| Name, tagline, about, emails, location, social links, footer lines | `src/content/site.ts` (`site`) |
+| Home page T-account (Accounting / Building sides) | `src/content/site.ts` (`site.balance`) |
+| Navigation | `src/content/site.ts` (`nav`): add a line plus its route folder in `src/app/(site)/` |
+| Projects | `src/content/projects.ts` (set `draft: false` when ready, `featured: true` to show on the home page) |
+| Résumé content | `src/content/resume.ts` (tag an entry with `types` to limit it to some versions) |
+| Résumé versions (labels, audiences, section order) | `src/content/resume.ts` (`variantConfig`); the list of versions is in `src/lib/resume-types.ts` |
+| Résumé PDF | Placeholder at `/resume/<type>/document` (`src/app/(site)/resume/[type]/document/page.tsx`) |
+| Link-in-bio page (`/socials`) | `src/content/socials.ts`; set `site.avatar` to show a photo instead of initials |
+| Contact page | `src/app/(site)/contact/page.tsx` (reads `site.emails` and `site.links`) |
 | Blog posts | `content/posts/*.md` (filename = URL slug) |
-| Playground experiments | `src/app/playground/<name>/page.tsx` |
+| Playground experiments | `src/app/(site)/playground/<name>/page.tsx` |
 | Colours, fonts, spacing, layout | Tokens at the top of `src/app/globals.css` |
 | Favicon | `src/app/favicon.ico` |
+
+Pages with the site header and footer live in `src/app/(site)/`; `/socials` lives in `src/app/(links)/` and has neither. The folder names in brackets don't appear in URLs.
 
 ## Blog post format
 

@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { nav, site } from "@/content/site";
+import { Suspense } from "react";
+import { NavLinks, NavLinksFallback } from "@/components/NavLinks";
+import { site } from "@/content/site";
 
 export function SiteHeader() {
   return (
@@ -9,13 +11,9 @@ export function SiteHeader() {
           {site.name}
         </Link>
         <nav className="site-nav" aria-label="Main">
-          <ul>
-            {nav.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href}>{item.label}</Link>
-              </li>
-            ))}
-          </ul>
+          <Suspense fallback={<NavLinksFallback />}>
+            <NavLinks />
+          </Suspense>
         </nav>
       </div>
     </header>
