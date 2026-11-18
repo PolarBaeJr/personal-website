@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# runtime data (résumé SQLite DB, private résumé files)
+/data/
+*.db
+*.db-*
+/private/

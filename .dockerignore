@@ -1,0 +1,10 @@
+.git
+node_modules
+.next
+.env
+.env.*
+data
+docker/*.sh
+!docker/entrypoint.sh
+.DS_Store
+npm-debug.log*

@@ -1,0 +1,42 @@
+# Personal site: Raspberry Pi deployment
+#
+#   ./docker/deploy.sh                    # from your Mac: sync, build, start
+#   cd docker && docker compose up -d --build   # on the Pi
+#
+# Routed by proxy-manager via the labels below. No nginx config needed.
+
+networks:
+  edge:
+    external: true
+
+volumes:
+  personal-page-data:
+
+services:
+  personal-page:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: personal-page:latest
+    container_name: personal-page
+    restart: unless-stopped
+    networks: [edge]
+
+    # Secrets and keys (PostHog, résumé API token) live in ../.env, never in git.
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      TZ: ${TZ:-America/Vancouver}
+
+    volumes:
+      - personal-page-data:/data
+
+    labels:
+      proxy.enable:     "true"
+      proxy.host:       "matthewcheng.net"
+      proxy.port:       "3000"
+      proxy.service:    "personal-page"
+      proxy.unscalable: "true"   # single instance (SQLite in phase 2)
+      proxy.health:     "/"
+      proxy.name:       "Personal site"
