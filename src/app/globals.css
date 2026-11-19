@@ -197,10 +197,19 @@
   }
 
   .site-footer {
-    border-top: 1px solid var(--line);
     color: var(--slate);
     font-size: 0.875rem;
     padding-block: var(--space-5);
+  }
+
+  .footer-total {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 3px double var(--ink);
+    padding-top: var(--space-2);
+    margin-bottom: var(--space-5);
+    color: var(--slate);
+    font-size: 0.8125rem;
   }
 
   .footer-grid {
@@ -407,14 +416,6 @@
     height: 8px;
   }
 
-  .swatch--cobalt {
-    background: var(--cobalt);
-  }
-
-  .swatch--teal {
-    background: var(--teal);
-  }
-
   .swatch--ink {
     background: var(--ink);
   }
@@ -494,17 +495,31 @@
     font-weight: 400;
   }
 
-  .skill-lines {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+  .dated-row--journal {
+    row-gap: var(--space-1);
   }
 
-  .skill-line {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
+  .journal-entry {
+    min-width: 0;
+  }
+
+  .journal-debit {
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .journal-credit {
+    padding-left: var(--space-5);
+    color: var(--slate);
+    line-height: 1.4;
+    margin-top: 0.15rem;
+  }
+
+  @media (max-width: 640px) {
+    .journal-credit {
+      padding-left: var(--space-4);
+    }
   }
 
   .skill-label {
@@ -599,12 +614,19 @@
       animation-timeline: --exp-row;
       animation-range: entry 25% entry 100%;
     }
+
+    .journal-credit {
+      animation: exp-reveal-item ease-out both;
+      animation-timeline: --exp-row;
+      animation-range: entry 10% entry 85%;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .home-experience,
     .dated-row,
-    .dated-row-bullet {
+    .dated-row-bullet,
+    .journal-credit {
       animation: none;
     }
   }
@@ -708,6 +730,52 @@
     font-weight: 600;
   }
 
+  /* Modifiers rely on source order: same specificity as the base .taccount*
+     rules above, so they must stay below them to win. */
+  .taccount--compact {
+    margin-top: var(--space-4);
+  }
+
+  .taccount-static {
+    animation: none;
+  }
+
+  .taccount-skill {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .taccount-empty {
+    color: var(--slate);
+  }
+
+  .taccount-entry {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .taccount-total--split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .taccount-total-cell {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .taccount-total-cell--debit {
+    padding-right: var(--space-5);
+  }
+
+  .taccount-total-cell--credit {
+    padding-left: var(--space-5);
+  }
+
   @keyframes ta-x {
     from {
       transform: scaleX(0);
@@ -760,6 +828,18 @@
       padding-left: 0;
       margin-top: var(--space-3);
       border-bottom: 2px solid var(--ink);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .taccount-total--split {
+      grid-template-columns: 1fr;
+      row-gap: var(--space-1);
+    }
+
+    .taccount-total-cell--debit,
+    .taccount-total-cell--credit {
+      padding-inline: 0;
     }
   }
 

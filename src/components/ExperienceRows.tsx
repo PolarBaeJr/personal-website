@@ -8,14 +8,16 @@ export function ExperienceRows({
   return (
     <ul className="row-list">
       {experience.map((job) => (
-        <li key={`${job.role}-${job.org}-${job.start}`} className="dated-row">
+        <li
+          key={`${job.role}-${job.org}-${job.start}`}
+          className="dated-row dated-row--journal"
+        >
           <time className="dated-row-date">
             {job.start}–{job.end ?? "Present"}
           </time>
-          <div>
-            <h3>
-              {job.role}, <span className="org">{job.org}</span>
-            </h3>
+          <div className="journal-entry">
+            <h3 className="journal-debit">{job.role}</h3>
+            <p className="journal-credit">{job.org}</p>
             <ul className="bullets">
               {job.bullets.map((bullet) => (
                 <li key={bullet} className="dated-row-bullet">

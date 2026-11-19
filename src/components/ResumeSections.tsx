@@ -4,18 +4,28 @@ import {
   getResume,
   getVariantMeta,
   SECTION_TITLES,
-  type LineKind,
   type Resume,
   type SectionKey,
+  type Side,
 } from "@/lib/resume";
 import type { ResumeType } from "@/lib/resume-types";
 
-const swatchTone: Record<LineKind, string> = {
-  accounting: "cobalt",
-  technical: "teal",
-  certifications: "ink",
-  other: "ink",
-};
+type SkillLine = Resume["skills"][number];
+
+function skillItems(line: SkillLine) {
+  return line.split === false
+    ? [line.text]
+    : line.text.split(",").map((item) => item.trim());
+}
+
+// Accounting and certifications always debit the left column and technical
+// skills always credit the right; "other" falls on whichever side the variant
+// leans toward.
+function skillSide(kind: SkillLine["kind"], variantSide: Side): Side {
+  if (kind === "accounting" || kind === "certifications") return "accounting";
+  if (kind === "technical") return "building";
+  return variantSide;
+}
 
 function dates(start?: string, end?: string) {
   if (!start) return null;
@@ -89,31 +99,69 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
           ))}
         </ul>
       );
-    case "skills":
-      return (
-        <ul className="skill-lines">
-          {resume.skills.map((line) => {
-            const items =
-              line.split === false
-                ? [line.text]
-                : line.text.split(",").map((item) => item.trim());
-            return (
-              <li key={line.label} className="skill-line">
-                <span
-                  className={`swatch swatch--${swatchTone[line.kind]}`}
-                  aria-hidden="true"
-                />
-                <span className="skill-label">{line.label}</span>
-                {items.map((item) => (
-                  <span key={item} className="pill pill--slate pill--wrap">
-                    {item}
-                  </span>
-                ))}
-              </li>
-            );
-          })}
-        </ul>
+    case "skills": {
+      const { side } = getVariantMeta(resume.type);
+      const accounting = resume.skills.filter(
+        (line) => skillSide(line.kind, side) === "accounting",
       );
+      const building = resume.skills.filter(
+        (line) => skillSide(line.kind, side) === "building",
+      );
+      const total = resume.skills.reduce(
+        (sum, line) => sum + skillItems(line).length,
+        0,
+      );
+      return (
+        <div className="taccount taccount--compact">
+          <h3 className="taccount-label taccount-label--accounting">
+            Accounting
+          </h3>
+          <h3 className="taccount-label taccount-label--building">Building</h3>
+          <div className="taccount-hr taccount-static" aria-hidden="true" />
+          <ul className="taccount-col taccount-col--accounting">
+            {accounting.length > 0 ? (
+              accounting.map((line) => (
+                <li key={line.label} className="taccount-skill">
+                  <span className="skill-label">{line.label}</span>
+                  <span className="pill-list">
+                    {skillItems(line).map((item) => (
+                      <span key={item} className="pill pill--cobalt pill--wrap">
+                        {item}
+                      </span>
+                    ))}
+                  </span>
+                </li>
+              ))
+            ) : (
+              <li className="taccount-empty">No entries yet</li>
+            )}
+          </ul>
+          <ul className="taccount-col taccount-col--building">
+            {building.length > 0 ? (
+              building.map((line) => (
+                <li key={line.label} className="taccount-skill">
+                  <span className="skill-label">{line.label}</span>
+                  <span className="pill-list">
+                    {skillItems(line).map((item) => (
+                      <span key={item} className="pill pill--teal pill--wrap">
+                        {item}
+                      </span>
+                    ))}
+                  </span>
+                </li>
+              ))
+            ) : (
+              <li className="taccount-empty">No entries yet</li>
+            )}
+          </ul>
+          <div className="taccount-vr taccount-static" aria-hidden="true" />
+          <p className="taccount-total">
+            <span className="taccount-total-label">Total entries</span>
+            <span className="taccount-total-value">{total}</span>
+          </p>
+        </div>
+      );
+    }
     case "languages":
       return (
         <ul className="pill-list">

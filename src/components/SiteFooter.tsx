@@ -8,6 +8,9 @@ const pages = [...nav, { label: "Socials", href: "/socials" }];
 export function SiteFooter() {
   return (
     <footer className="site-footer">
+      <div className="site-width">
+        <p className="footer-total">Balance carried forward</p>
+      </div>
       <div className="site-width footer-grid">
         <div className="footer-group">
           <p className="footer-name">{site.name}</p>
