@@ -32,7 +32,7 @@ services:
     networks: [edge]
 
     # Secrets and keys live in ../.env, never in git (see ../.env.example):
-    # PostHog, RESUME_API_TOKEN, RESUME_PHONE, RESUME_ADDRESS. RESUME_DB and
+    # PostHog, RESUME_API_TOKEN, RESUME_PHONE, RESUME_ADDRESS, OWNER_PASSWORD_HASH. RESUME_DB and
     # CONTENT_DB are pinned below to the data volume.
     env_file:
       - path: ../.env

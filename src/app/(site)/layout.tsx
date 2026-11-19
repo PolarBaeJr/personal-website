@@ -1,3 +1,4 @@
+import { OwnerBar } from "@/components/OwnerBar";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -7,6 +8,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
       <SiteHeader />
       <main className="site-main site-width">{children}</main>
       <SiteFooter />
+      <OwnerBar />
     </>
   );
 }

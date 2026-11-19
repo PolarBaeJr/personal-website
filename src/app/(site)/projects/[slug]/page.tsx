@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import { io } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EditLink } from "@/components/EditLink";
 import { RepoCard } from "@/components/RepoCard";
 import { Skeleton } from "@/components/Skeleton";
 import { projectsSeed, type Project } from "@/content/projects";
 import { getProject } from "@/lib/content";
 import { visibleProjects } from "@/lib/content-view";
 import { parseGitHubRepo } from "@/lib/github";
+import { getOwner } from "@/lib/owner";
 
 const seedProjects = visibleProjects(projectsSeed);
 
@@ -86,10 +88,16 @@ function ProjectBody({ project }: { project: Project }) {
 
 async function LiveProjectBody({ slug }: { slug: string }) {
   await io();
-  const project = await getProject(slug);
+  const owner = await getOwner();
+  const project = await getProject(slug, !!owner);
   // Backstop only: the proxy 404s unknown slugs before rendering starts.
   if (!project) notFound();
-  return <ProjectBody project={project} />;
+  return (
+    <>
+      <ProjectBody project={project} />
+      <EditLink href={`/admin/projects?open=${slug}`} label="Edit this project" />
+    </>
+  );
 }
 
 export default async function ProjectPage({

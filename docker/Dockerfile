@@ -54,7 +54,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 COPY --from=tectonic /usr/local/bin/tectonic /usr/local/bin/tectonic
 
-# Only what `next start` needs at runtime, plus the plain-node scripts (seed, import) with the store code they import.
+# Only what `next start` needs at runtime, plus the plain-node scripts (seed, import, owner:sign-out-all) with the store code they import.
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
@@ -64,6 +64,7 @@ COPY --from=build /app/next.config.ts ./next.config.ts
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/src/lib/resume-store ./src/lib/resume-store
 COPY --from=build /app/src/lib/resume-types.ts ./src/lib/resume-types.ts
+COPY --from=build /app/src/lib/content-store ./src/lib/content-store
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # /data holds runtime state (the résumé SQLite DB) on a volume.

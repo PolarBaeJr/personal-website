@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { io } from "next/cache";
 import { ContactNote } from "@/components/ContactNote";
 import { CopyButton } from "@/components/CopyButton";
+import { EditLink } from "@/components/EditLink";
 import { Skeleton } from "@/components/Skeleton";
 import { displayUrl, type Site } from "@/content/site";
 import { getSite } from "@/lib/content";
@@ -85,6 +86,7 @@ export default function ContactPage() {
             ))}
           </ul>
 
+          <EditLink href="/admin/site#edit-emails" label="Edit contact details" />
           <Suspense fallback={<Skeleton lines={5} />}>
             <LiveContactRows />
           </Suspense>

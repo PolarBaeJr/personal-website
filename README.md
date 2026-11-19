@@ -42,6 +42,24 @@ Still in code:
 
 Pages with the site header and footer live in `src/app/(site)/`; `/socials` lives in `src/app/(links)/` and has neither. The folder names in brackets don't appear in URLs.
 
+## Editing in the browser
+
+Sign in at `/login` to edit the site from any browser, phone included. While signed in, every public page shows an "Edit this page" bar and small "Edit ..." links next to each section; `/admin` lists everything. Drafts (projects and posts) are visible only to you. Each save is a version, so the History page on each section can put an older one back. Visitors never see any of this: `/admin` answers 404 unless you are signed in.
+
+Set up once:
+
+1. Run `npm run owner:hash-password`, type a password (12 characters or more) twice. It prints one line, `OWNER_PASSWORD_HASH=scrypt:...`.
+2. Put that line in the server's `.env` (the repo root on the Pi, which `docker/docker-compose.yml` reads; `.env.local` for `npm run dev`) and recreate the container: `docker compose -f docker/docker-compose.yml up -d`. The value uses `:` separators on purpose; a `$` would be mangled by Docker Compose and Next's env loading.
+3. Open `/login`.
+
+Turning it off or locking everyone out:
+
+- Remove `OWNER_PASSWORD_HASH` (or leave it empty) and restart. Sign-in and every session stop working at once.
+- To end every signed-in session but keep sign-in on (for example after using a shared computer): `npm run owner:sign-out-all`, or on the Pi `docker exec personal-page npm run owner:sign-out-all`. Changing the password also needs a restart, but old sessions stay valid until you run this.
+- Sessions last 14 days from the last visit. Five wrong passwords from one address pause sign-in there for 15 minutes; twenty in an hour pause it for everyone for an hour.
+
+Behind Cloudflare and the reverse proxy: saving uses Next.js Server Actions, which refuse a request whose `Origin` doesn't match the `Host` (or `X-Forwarded-Host`) the app sees. The proxy must pass the public host name through (`Host: matthewcheng.net`, or `X-Forwarded-Host`). If saving or signing in fails with "didn't reach the site" (and the server log says the `x-forwarded-host` or `host` header "does not match `origin`"), that is the first thing to check.
+
 ## Blog post format
 
 Seed posts in `content/posts/` use frontmatter:

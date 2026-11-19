@@ -9,16 +9,6 @@ export type Certification = {
   date?: string;
 };
 
-export function competitionDates(start?: string, end?: string) {
-  if (!start) return null;
-  return end ? `${start}–${end}` : start;
-}
-
-export function clubDates(start?: string, end?: string) {
-  if (!start) return null;
-  return `${start}–${end ?? "Present"}`;
-}
-
 // Reads the résumé and the about section, so it is tagged with both.
 export async function getCompetitions(): Promise<Competition[]> {
   "use cache";

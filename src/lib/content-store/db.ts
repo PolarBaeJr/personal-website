@@ -71,15 +71,34 @@ function transaction<T>(db: DatabaseSync, fn: () => T): T {
   }
 }
 
+// Owner sign-in: sessions keyed by the sha256 of the cookie value, and
+// failed sign-in attempts for throttling. Times are SQLite's (UTC).
+const OWNER_SCHEMA = `
+CREATE TABLE IF NOT EXISTS owner_sessions (
+  id_hash TEXT PRIMARY KEY,
+  csrf TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS login_attempts (
+  at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ip TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS login_attempts_by_at ON login_attempts(at);
+`;
+
+// MIGRATIONS[i] takes user_version i to i + 1.
+const MIGRATIONS = [SCHEMA, OWNER_SCHEMA];
+
 function migrate(db: DatabaseSync) {
   const version = () =>
     (db.prepare("PRAGMA user_version").get() as { user_version: number })
       .user_version;
-  if (version() >= 1) return;
+  if (version() >= MIGRATIONS.length) return;
   transaction(db, () => {
-    if (version() >= 1) return;
-    db.exec(SCHEMA);
-    db.exec("PRAGMA user_version = 1");
+    for (let v = version(); v < MIGRATIONS.length; v++) db.exec(MIGRATIONS[v]);
+    db.exec(`PRAGMA user_version = ${MIGRATIONS.length}`);
   });
 }
 
@@ -221,6 +240,17 @@ export function insertContentVersion(
       .get(Number(result.lastInsertRowid)) as MetaRow;
     return { ok: true, meta: toMeta(row) };
   });
+}
+
+// The newest versions across every section and post, for the admin dashboard.
+export function listRecentVersions(db: DatabaseSync, limit: number): ContentMeta[] {
+  const rows = db
+    .prepare(
+      `SELECT ${META_COLUMNS} FROM ${META_FROM}
+       ORDER BY v.created_at DESC, v.id DESC LIMIT ?`,
+    )
+    .all(limit) as MetaRow[];
+  return rows.map(toMeta);
 }
 
 // Drops the current pointer only; the history stays for restore.

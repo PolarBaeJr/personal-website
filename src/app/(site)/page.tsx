@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { io } from "next/cache";
 import Link from "next/link";
 import { TestimonialsSection } from "@/components/AboutSections";
+import { EditLink } from "@/components/EditLink";
 import { ExperienceRows } from "@/components/ExperienceRows";
 import { ProjectList } from "@/components/ProjectList";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -12,6 +13,7 @@ import type { Home as HomeData } from "@/content/home";
 import { siteIdentity, type Site } from "@/content/site";
 import { getFeaturedProjects, getHome, getSite } from "@/lib/content";
 import { homeExperience } from "@/lib/content-view";
+import { getOwner } from "@/lib/owner";
 import { getResume } from "@/lib/resume";
 
 export const metadata: Metadata = {
@@ -52,7 +54,8 @@ function Intro({ site, home }: { site: Site; home: HomeData }) {
 
 async function LiveIntro() {
   await io();
-  const [site, home] = await Promise.all([getSite(), getHome()]);
+  const owner = await getOwner();
+  const [site, home] = await Promise.all([getSite(), getHome(!!owner)]);
   return <Intro site={site} home={home} />;
 }
 
@@ -83,8 +86,9 @@ function ExperienceSection({
 
 async function LiveExperience() {
   await io();
+  const owner = await getOwner();
   const [home, { experience }] = await Promise.all([
-    getHome(),
+    getHome(!!owner),
     getResume("general"),
   ]);
   const taItems = home.balance.accounting.length + home.balance.building.length;
@@ -93,6 +97,7 @@ async function LiveExperience() {
   const revealDelayMs = 1300 + (taItems - 1) * 70 + 300;
   return (
     <ExperienceSection taItems={taItems}>
+      <EditLink href="/admin/home#edit-experience" label="Edit experience on the home page" />
       <ScrollReveal initialDelayMs={revealDelayMs}>
         <ExperienceRows experience={homeExperience(home, experience)} />
       </ScrollReveal>
@@ -116,7 +121,13 @@ function FeaturedProjects({ children }: { children: React.ReactNode }) {
 
 async function LiveFeaturedProjects() {
   await io();
-  return <ProjectList projects={await getFeaturedProjects()} />;
+  const owner = await getOwner();
+  return (
+    <>
+      <EditLink href="/admin/home#edit-projects" label="Edit featured projects" />
+      <ProjectList projects={await getFeaturedProjects(!!owner)} />
+    </>
+  );
 }
 
 async function GetInTouchButtons() {
@@ -143,6 +154,7 @@ export default function Home() {
         <h1 className="display">
           Hey, I&apos;m {siteIdentity.name.split(" ")[0]}.
         </h1>
+        <EditLink href="/admin/site#edit-about" label="Edit intro and status line" />
         <Suspense fallback={<Skeleton lines={6} minHeight="24rem" />}>
           <LiveIntro />
         </Suspense>

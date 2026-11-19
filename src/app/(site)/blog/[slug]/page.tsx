@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import { io } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EditLink } from "@/components/EditLink";
 import { Skeleton } from "@/components/Skeleton";
 import { getPost } from "@/lib/content";
 import { seedPosts } from "@/lib/content-data";
 import { postList } from "@/lib/content-view";
+import { getOwner } from "@/lib/owner";
 import type { Post } from "@/lib/posts";
 
 // The live posts are in the DB; slugs outside the seeds render on demand
@@ -30,7 +32,10 @@ export async function generateMetadata({
 function PostBody({ post }: { post: Post }) {
   return (
     <>
-      <h1 className="page-title">{post.title}</h1>
+      <h1 className="page-title">
+        {post.title}
+        {post.draft && <span className="badge-draft">Draft</span>}
+      </h1>
       <time dateTime={post.date} className="text-slate">
         {post.date}
       </time>
@@ -44,10 +49,16 @@ function PostBody({ post }: { post: Post }) {
 
 async function LivePostBody({ slug }: { slug: string }) {
   await io();
-  const post = await getPost(slug);
+  const owner = await getOwner();
+  const post = await getPost(slug, !!owner);
   // Backstop only: the proxy 404s unknown slugs before rendering starts.
   if (!post) notFound();
-  return <PostBody post={post} />;
+  return (
+    <>
+      <PostBody post={post} />
+      <EditLink href={`/admin/posts/${slug}`} label="Edit this post" />
+    </>
+  );
 }
 
 export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {

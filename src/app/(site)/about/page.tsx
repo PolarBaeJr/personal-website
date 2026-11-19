@@ -7,6 +7,7 @@ import {
   CompetitionsSection,
   HobbiesSection,
 } from "@/components/AboutSections";
+import { EditLink } from "@/components/EditLink";
 import { Skeleton } from "@/components/Skeleton";
 import { getSite } from "@/lib/content";
 
@@ -32,6 +33,7 @@ export default function AboutPage() {
     <div className="stack">
       <section className="flow">
         <h1 className="page-title">About</h1>
+        <EditLink href="/admin/site#edit-about" label="Edit about text" />
         <Suspense fallback={<Skeleton lines={4} />}>
           <LiveParagraphs />
         </Suspense>

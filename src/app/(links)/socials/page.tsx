@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { siteIdentity, type Site } from "@/content/site";
 import { CopyIconButton } from "@/components/CopyIconButton";
+import { EditLink } from "@/components/EditLink";
 import { Skeleton } from "@/components/Skeleton";
 import { SocialIcon } from "@/components/SocialIcon";
 import { getSite, getSocials } from "@/lib/content";
@@ -134,6 +135,7 @@ export default function SocialsPage() {
         <LiveLinksBody />
       </Suspense>
 
+      <EditLink href="/admin/socials" label="Edit links page" />
       <p className="links-footer">
         <Link href="/" className="links-footer-link">
           matthewcheng.net

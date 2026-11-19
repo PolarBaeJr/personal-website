@@ -11,7 +11,9 @@
     "resume:import": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/import-resume-pdfs.ts",
     "resume:pull": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts pull",
     "resume:push": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts push",
-    "journal:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-journal-scenarios.ts"
+    "journal:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-journal-scenarios.ts",
+    "owner:hash-password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/hash-owner-password.ts",
+    "owner:sign-out-all": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/sign-out-all.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

@@ -129,14 +129,17 @@ export function readPostSync(slug: string): PostData | undefined {
   return readPostsSync().find((post) => post.slug === slug)?.data;
 }
 
-// For the proxy: whether a visitor may open the page.
-export function projectExists(slug: string): boolean {
-  return visibleProjects(readSectionSync("projects")).some((p) => p.slug === slug);
+// For the proxy: whether a visitor (or, with includeDrafts, the owner) may
+// open the page.
+export function projectExists(slug: string, includeDrafts = false): boolean {
+  return visibleProjects(readSectionSync("projects"), includeDrafts).some(
+    (p) => p.slug === slug,
+  );
 }
 
-export function postExists(slug: string): boolean {
+export function postExists(slug: string, includeDrafts = false): boolean {
   const post = readPostSync(slug);
-  return post !== undefined && !post.draft;
+  return post !== undefined && (includeDrafts || !post.draft);
 }
 
 let writeDb: DatabaseSync | undefined;
