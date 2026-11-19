@@ -26,9 +26,10 @@ export function clubDates(start?: string, end?: string) {
   return `${start}–${end ?? "Present"}`;
 }
 
-export function getCompetitions(): Competition[] {
-  const fromResume = getResume("general")
-    .projects.filter((project) => project.competition)
+export async function getCompetitions(): Promise<Competition[]> {
+  const { projects } = await getResume("general");
+  const fromResume = projects
+    .filter((project) => project.competition)
     .map((project) => ({
       name: project.title,
       role: project.subtitle,
@@ -39,9 +40,10 @@ export function getCompetitions(): Competition[] {
   return [...fromResume, ...competitions];
 }
 
-export function getCertifications(): Certification[] {
-  return getResume("general")
-    .skills.filter((line) => line.kind === "certifications")
+export async function getCertifications(): Promise<Certification[]> {
+  const { skills } = await getResume("general");
+  return skills
+    .filter((line) => line.kind === "certifications")
     .map((line) => {
       const text = line.text.trim();
       // "Issuer, Name (Mon YYYY)"; anything else falls back to name-only.

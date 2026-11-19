@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ResumeSections } from "@/components/ResumeSections";
@@ -24,12 +25,12 @@ export default function ResumePage() {
                   <Link href={`/resume/${type}`} className="btn btn--outline">
                     View
                   </Link>
-                  <Link
+                  <a
                     href={`/resume/${type}/document`}
                     className="btn btn--outline"
                   >
                     Document
-                  </Link>
+                  </a>
                 </div>
                 <p className="row-summary">{meta.audience}</p>
               </li>
@@ -40,7 +41,9 @@ export default function ResumePage() {
 
       <section className="flow">
         <h2>Full résumé</h2>
-        <ResumeSections type="general" />
+        <Suspense fallback={<p className="text-slate">Loading…</p>}>
+          <ResumeSections type="general" />
+        </Suspense>
       </section>
     </div>
   );

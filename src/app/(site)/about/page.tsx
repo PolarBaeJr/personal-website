@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import {
   CertificationsSection,
@@ -22,8 +23,10 @@ export default function AboutPage() {
           </p>
         ))}
       </section>
-      <CompetitionsSection />
-      <CertificationsSection />
+      <Suspense fallback={<p className="text-slate">Loading…</p>}>
+        <CompetitionsSection />
+        <CertificationsSection />
+      </Suspense>
       <ClubsSection />
       <HobbiesSection />
     </div>

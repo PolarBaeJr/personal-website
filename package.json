@@ -6,18 +6,23 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "resume:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-resume.ts",
+    "resume:import": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/import-resume-pdfs.ts",
+    "resume:pull": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts pull",
+    "resume:push": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts push"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
     "marked": "^18.2.1",
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

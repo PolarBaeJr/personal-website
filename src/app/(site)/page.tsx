@@ -1,5 +1,6 @@
-import type { CSSProperties } from "react";
+import { Suspense, type CSSProperties } from "react";
 import type { Metadata } from "next";
+import { io } from "next/cache";
 import Link from "next/link";
 import { TestimonialsSection } from "@/components/AboutSections";
 import { ExperienceRows } from "@/components/ExperienceRows";
@@ -13,8 +14,13 @@ export const metadata: Metadata = {
   title: { absolute: site.name },
 };
 
+async function HomeExperience() {
+  await io();
+  const { experience } = await getResume("general");
+  return <ExperienceRows experience={experience} />;
+}
+
 export default function Home() {
-  const { experience } = getResume("general");
   // T-account item count, set on the section so the .home-experience
   // animation-delay in CSS can wait until the T-account has finished.
   const taItems = site.balance.accounting.length + site.balance.building.length;
@@ -53,7 +59,9 @@ export default function Home() {
             Full résumé
           </Link>
         </div>
-        <ExperienceRows experience={experience} />
+        <Suspense fallback={<p className="text-slate">Loading…</p>}>
+          <HomeExperience />
+        </Suspense>
       </section>
 
       <section className="flow">

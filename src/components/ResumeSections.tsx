@@ -1,3 +1,4 @@
+import { io } from "next/cache";
 import Link from "next/link";
 import { ExperienceRows } from "@/components/ExperienceRows";
 import {
@@ -175,8 +176,10 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
   }
 }
 
-export function ResumeSections({ type }: { type: ResumeType }) {
-  const resume = getResume(type);
+// Render inside <Suspense>: io() keeps the DB read out of the static shell.
+export async function ResumeSections({ type }: { type: ResumeType }) {
+  await io();
+  const resume = await getResume(type);
   const sections = getVariantMeta(type).sectionOrder.filter((section) => {
     if (section === "highlights") return resume.highlights !== undefined;
     return resume[section].length > 0;

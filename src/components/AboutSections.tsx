@@ -1,3 +1,4 @@
+import { io } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -30,8 +31,10 @@ function RowLink({ href, children }: { href: string; children: string }) {
   );
 }
 
-export function CompetitionsSection() {
-  const competitions = getCompetitions();
+// Render inside <Suspense>: io() keeps the résumé read out of the static shell.
+export async function CompetitionsSection() {
+  await io();
+  const competitions = await getCompetitions();
   if (competitions.length === 0) return null;
 
   return (
@@ -69,8 +72,10 @@ export function CompetitionsSection() {
   );
 }
 
-export function CertificationsSection() {
-  const certifications = getCertifications();
+// Render inside <Suspense>, as above.
+export async function CertificationsSection() {
+  await io();
+  const certifications = await getCertifications();
   if (certifications.length === 0) return null;
 
   return (

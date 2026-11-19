@@ -1,8 +1,8 @@
 import type { ResumeType } from "@/lib/resume-types";
 
 // Read through src/lib/resume.ts only; pages never import this file directly.
-// Tag an entry with `types` to show it only on those variants. Untagged entries
-// appear on every variant, and "general" shows everything.
+// Résumé content lives in resumes/<type>.tex; this file holds the types and
+// the per-variant settings the .tex can't express.
 
 export type Side = "accounting" | "building";
 
@@ -14,11 +14,9 @@ export type SectionKey =
   | "skills"
   | "languages";
 
-export type Tagged = { types?: ResumeType[] };
+export type ResumeHighlight = { text: string };
 
-export type ResumeHighlight = Tagged & { text: string };
-
-export type ResumeExperience = Tagged & {
+export type ResumeExperience = {
   role: string;
   org: string;
   location?: string;
@@ -27,7 +25,7 @@ export type ResumeExperience = Tagged & {
   bullets: string[];
 };
 
-export type ResumeEducation = Tagged & {
+export type ResumeEducation = {
   school: string;
   credential: string;
   location?: string;
@@ -36,7 +34,7 @@ export type ResumeEducation = Tagged & {
   details: string[];
 };
 
-export type ResumeProject = Tagged & {
+export type ResumeProject = {
   title: string;
   subtitle?: string;
   href?: string;
@@ -49,7 +47,7 @@ export type ResumeProject = Tagged & {
 
 export type LineKind = "accounting" | "technical" | "certifications" | "other";
 
-export type ResumeLine = Tagged & {
+export type ResumeLine = {
   label: string;
   text: string;
   kind: LineKind;
@@ -70,6 +68,7 @@ const accountingSections: SectionKey[] = [
   "highlights",
   "education",
   "experience",
+  "projects",
   "skills",
   "languages",
 ];
@@ -140,108 +139,44 @@ export const variantConfig: Record<ResumeType, VariantConfig> = {
 
 export const location = "Burnaby, BC";
 
-export const highlights: ResumeHighlight[] = [];
-
-export const education: ResumeEducation[] = [
-  {
-    school: "Simon Fraser University, Beedie School of Business",
-    credential:
-      "Bachelor of Business Administration, Accounting Concentration (in progress)",
-    location: "Burnaby, BC",
-    start: "May 2025",
-    end: "May 2028",
-    details: [
-      "Relevant coursework: Financial Accounting I (BUS 251), Managerial Accounting I (BUS 254), Financial Accounting: Assets (BUS 320), Commercial Law (BUS 393), Business Technology Management (BUS 237), Business Communication (BUS 360W); Financial Accounting: Equities (BUS 321) in progress.",
-      "Member: Accounting Student Association.",
-    ],
-  },
-  {
-    school: "Fraser International College",
-    credential:
-      "University Transfer Program, Stage II in Business Administration",
-    location: "Burnaby, BC",
-    start: "Sep 2023",
-    end: "Apr 2025",
-    details: [],
-  },
+// Section titles in the .tex files map to page sections by these patterns,
+// tested case-insensitively in this order. Unmatched sections are dropped.
+export const sectionAliases: [SectionKey, RegExp][] = [
+  ["education", /education/i],
+  ["experience", /experience|employment|leadership|involvement|extracurricular/i],
+  ["projects", /project|competition|award/i],
+  ["skills", /skill|certification/i],
+  ["languages", /^languages$/i],
+  ["highlights", /highlight|summary|profile|qualification/i],
 ];
 
-export const experience: ResumeExperience[] = [
-  {
-    role: "Internal Events Director",
-    org: "SFU Badminton Club",
-    location: "Burnaby, BC",
-    start: "May 2026",
-    bullets: [
-      "Forecast and manage the internal events budget, tracking spend against plan and reconciling costs and reimbursements.",
-      "Plan and host club events across a 15-person team, including facility bookings, equipment, and scheduling.",
-      "Record meeting minutes and own registration and attendance records for club events.",
-      "Stepped in to run two 60-player club competitions when the host was unavailable, allocating 8+ courts and managing player flow to reduce crowding and keep matches on schedule.",
-    ],
-  },
-  {
-    role: "Customer Service Representative",
-    org: "Whole Foods Market",
-    location: "Burnaby, BC",
-    start: "Nov 2025",
-    end: "Mar 2026",
-    bullets: [
-      "Processed 150+ POS transactions per eight-hour shift across payments, returns, and exchanges, maintaining accuracy under continuous customer volume.",
-      "Supported daily till reconciliation at shift close, checking transaction records against cash on hand and flagging discrepancies before handover.",
-      "Documented escalations and exceptions so the next shift had a complete, reviewable record.",
-    ],
-  },
-  {
-    role: "Peer Educator",
-    org: "Fraser International College",
-    location: "Burnaby, BC",
-    start: "Sep 2024",
-    end: "May 2025",
-    bullets: [
-      "Supported 50+ students per semester through drop-in and booked advising sessions.",
-    ],
-  },
-];
+// Skill line labels (lowercase) to the T-account side they post to. Anything
+// unlisted is "other". A "languages" line fills the Languages section instead.
+export const skillLabelKinds: Record<string, LineKind | "languages"> = {
+  accounting: "accounting",
+  "accounting tools": "accounting",
+  finance: "accounting",
+  technical: "technical",
+  programming: "technical",
+  "programming languages": "technical",
+  tools: "technical",
+  software: "technical",
+  frameworks: "technical",
+  data: "technical",
+  certifications: "certifications",
+  certification: "certifications",
+  languages: "languages",
+};
 
-export const resumeProjects: ResumeProject[] = [
-  {
-    title: "SFU Badminton Club Web Application",
+// What a .tex file can't carry, keyed by lowercase project title.
+// competition: true also lists the project under Case competitions & awards
+// on /about.
+export const projectMeta: Record<string, { href?: string; competition?: boolean }> = {
+  "sfu badminton club web application": { href: "/projects/badminton-club-app" },
+  "sfu badminton club digital payment ledger": {
     href: "/projects/badminton-club-app",
-    start: "May 2026",
-    bullets: [
-      "Co-developed the club's web app with a two-person team and built a custom Elo rating engine.",
-      "Built and deployed an e-transfer verification flow matching payments to sign-ups, used for 20+ payments.",
-    ],
   },
-  {
-    title: "CBV Institute Business Valuation Challenge",
-    subtitle: "Team Member",
-    start: "Nov 2026",
-    competition: true,
-    bullets: [
-      "Built the team's Excel valuation model, normalizing 3 years of EBITDA (removing excess owner pay and personal costs) and setting maintainable EBITDA of $21.7M with a through-the-cycle weighting.",
-      "Selected a 5.0x–6.0x EV/EBITDA multiple, below the precedent median for declining margins and customer concentration, valuing the 85% stake at about $65M.",
-      "Flagged that our weighting double-counted a recovery, leading to a $61.3M offer with a vendor take-back and earn-out instead of paying for recovery upfront.",
-    ],
-  },
-];
-
-// Accounting and technical skill lines go here too, e.g.
-// { label: "Accounting", kind: "accounting", text: "Excel, Reconciliations" }
-// Certification lines are written as `Issuer, Certificate name (Mon YYYY)`;
-// /about splits them into issuer/name/date. Give each line a unique label or
-// keep split: false.
-export const skills: ResumeLine[] = [
-  {
-    label: "Certification",
-    kind: "certifications",
-    text: "Microsoft, Preparing Data for Analysis with Microsoft Excel (Nov 2025)",
-    split: false,
-  },
-];
-
-export const languages: string[] = [
-  "Cantonese (native / bilingual)",
-  "English (native / bilingual)",
-  "Mandarin (conversational)",
-];
+  "sfu badminton club payment ledger": { href: "/projects/badminton-club-app" },
+  "cbv institute business valuation challenge": { competition: true },
+  "cbv institute business valuation case competition": { competition: true },
+};

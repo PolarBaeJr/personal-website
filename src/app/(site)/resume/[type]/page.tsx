@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -34,11 +35,13 @@ export default async function ResumeVariantPage({
       <h1 className="page-title">{meta.label} résumé</h1>
       {meta.summary && <p className="lede">{meta.summary}</p>}
       <div className="btn-row">
-        <Link href={`/resume/${type}/document`} className="btn btn--outline">
+        <a href={`/resume/${type}/document`} className="btn btn--outline">
           Download PDF
-        </Link>
+        </a>
       </div>
-      <ResumeSections type={type} />
+      <Suspense fallback={<p className="text-slate">Loading…</p>}>
+        <ResumeSections type={type} />
+      </Suspense>
     </div>
   );
 }

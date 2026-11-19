@@ -1,16 +1,8 @@
-import {
-  education,
-  experience,
-  highlights,
-  languages,
-  location,
-  resumeProjects,
-  skills,
-  variantConfig,
-  type SectionKey,
-  type Tagged,
-} from "@/content/resume";
-import { displayUrl, site } from "@/content/site";
+import { cacheLife, cacheTag } from "next/cache";
+import { variantConfig, type SectionKey } from "@/content/resume";
+import { buildResume } from "@/lib/resume-build";
+import { readCurrentTex } from "@/lib/resume-data";
+import { parseResumeTex } from "@/lib/resume-tex/parse";
 import type { ResumeType } from "@/lib/resume-types";
 
 export type {
@@ -38,43 +30,13 @@ export function getVariantMeta(type: ResumeType) {
   return variantConfig[type];
 }
 
-function forType<T extends Tagged>(items: T[], type: ResumeType): T[] {
-  return items.filter(
-    (x) => type === "general" || !x.types || x.types.includes(type),
-  );
+// Callers must `await io()` first (inside Suspense) so this only runs at
+// request time and never bakes the repo .tex into the static shell.
+export async function getResume(type: ResumeType) {
+  "use cache";
+  cacheLife("max");
+  cacheTag("resume", `resume:${type}`);
+  return buildResume(type, parseResumeTex(readCurrentTex(type)));
 }
 
-export function getResume(type: ResumeType) {
-  const { lineOrder } = variantConfig[type];
-  const filteredHighlights = forType(highlights, type);
-
-  return {
-    type,
-    header: {
-      name: site.name,
-      location,
-      contacts: [
-        ...site.emails.map((e) => ({
-          label: e.label,
-          href: `mailto:${e.address}`,
-          text: e.address,
-        })),
-        ...site.links.map((l) => ({
-          label: l.label,
-          href: l.href,
-          text: displayUrl(l.href),
-        })),
-      ],
-    },
-    highlights: filteredHighlights.length > 0 ? filteredHighlights : undefined,
-    education: forType(education, type),
-    experience: forType(experience, type),
-    projects: forType(resumeProjects, type),
-    skills: forType(skills, type).sort(
-      (a, b) => lineOrder.indexOf(a.kind) - lineOrder.indexOf(b.kind),
-    ),
-    languages,
-  };
-}
-
-export type Resume = ReturnType<typeof getResume>;
+export type Resume = Awaited<ReturnType<typeof getResume>>;
