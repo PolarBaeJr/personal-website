@@ -10,7 +10,6 @@ export default function ContactPage() {
   return (
     <div className="flow">
       <h1 className="page-title">Contact</h1>
-      <p className="lede">The best way to reach me is email.</p>
       <ul className="row-list">
         {site.emails.map((email) => (
           <li key={email.address} className="row">

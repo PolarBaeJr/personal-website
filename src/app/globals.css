@@ -276,7 +276,7 @@
 
   .site-main {
     flex: 1;
-    padding-block: var(--space-6) var(--space-7);
+    padding-block: var(--space-6);
   }
 
   .site-footer {
@@ -435,6 +435,27 @@
 
   .chip-link:hover {
     color: var(--cobalt);
+  }
+
+  /* Project tags: what the project is. One neutral outline style, no fill,
+     so the label reads as a description rather than a status colour. */
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tag {
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) - 4px);
+    color: var(--slate);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    white-space: nowrap;
   }
 
   /* Pills, badges and swatches */
@@ -609,6 +630,25 @@
     font-weight: 600;
   }
 
+  /* Résumé skills with only one side filled, and long text items
+     (certifications, languages): a plain list instead of pills. */
+  .skill-plain {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+
+  .skill-text-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    list-style: none;
+    padding: 0;
+    color: var(--slate);
+  }
+
   .resume-sections {
     display: flex;
     flex-direction: column;
@@ -727,37 +767,39 @@
     }
   }
 
+  /* Scroll-linked keyframes only move things, never hide them: Safari can
+     leave a view timeline stuck at its start, and a stuck fade made rows
+     look like the page had stopped loading. */
   @keyframes exp-reveal {
     from {
-      opacity: 0;
       translate: 0 1.25rem;
     }
   }
 
   @keyframes exp-reveal-item {
     from {
-      opacity: 0;
       translate: 0 0.5rem;
     }
   }
 
   /* Bullets share their row's named view timeline so they reveal with it,
      starting a little later in the entry range. */
+  /* Home page only: résumé pages are for reading and render still. */
   @supports (animation-timeline: view()) {
-    .dated-row {
+    .home-experience .dated-row {
       view-timeline: --exp-row block;
       animation: exp-reveal ease-out both;
       animation-timeline: --exp-row;
       animation-range: entry 0% entry 100%;
     }
 
-    .dated-row-bullet {
+    .home-experience .dated-row-bullet {
       animation: exp-reveal-item ease-out both;
       animation-timeline: --exp-row;
       animation-range: entry 25% entry 100%;
     }
 
-    .journal-credit {
+    .home-experience .journal-credit {
       animation: exp-reveal-item ease-out both;
       animation-timeline: --exp-row;
       animation-range: entry 10% entry 85%;
@@ -1547,15 +1589,6 @@
     }
   }
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
   /* Contact */
   .contact-value {
     align-items: center;
@@ -1705,42 +1738,149 @@
     gap: 0.75rem;
   }
 
+  /* Link-in-bio buttons: one style for every link, rounded pills with the
+     icon pinned left and the label centred. */
   .links-btn {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.25rem;
-    padding-inline: var(--space-3);
+    min-height: 3.5rem;
+    padding-inline: 3.5rem;
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 999px;
     background: var(--surface);
     font-weight: 500;
     text-align: center;
-    transition: background-color 150ms, border-color 150ms, color 150ms;
+    transition:
+      border-color 150ms,
+      color 150ms,
+      transform 150ms;
   }
 
   .links-btn:hover {
     border-color: var(--cobalt);
     color: var(--cobalt);
+    transform: translateY(-1px);
   }
 
-  .links-btn--primary {
-    border-color: var(--cobalt);
-    background: var(--cobalt);
-    color: var(--on-cobalt);
+  .links-btn:active {
+    transform: scale(0.98);
   }
 
-  .links-btn--primary:hover {
-    background: color-mix(in srgb, var(--cobalt) 88%, var(--ink));
-    color: var(--on-cobalt);
+  .links-btn-icon {
+    position: absolute;
+    left: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--slate);
+    transition: color 150ms;
   }
 
-  .links-btn--cobalt {
-    border-left: 3px solid var(--cobalt);
+  .links-btn:hover .links-btn-icon {
+    color: var(--cobalt);
   }
 
-  .links-btn--teal {
-    border-left: 3px solid var(--teal);
+  .links-btn-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .links-btn-label {
+    overflow-wrap: anywhere;
+  }
+
+  .links-btn-sub {
+    color: var(--slate);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    overflow-wrap: anywhere;
+  }
+
+  /* The copy button sits on top of the row's right end. It is a sibling of
+     the link (a button can't live inside an <a>), positioned over it. */
+  .links-item {
+    position: relative;
+  }
+
+  .links-copy {
+    position: absolute;
+    top: 50%;
+    right: 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--slate);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .links-copy:hover {
+    color: var(--cobalt);
+    background: color-mix(in srgb, var(--cobalt) 10%, transparent);
+  }
+
+  .links-copy[data-copied] {
+    color: var(--teal);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .links-copy svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .links-quick {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  .links-quick-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    color: var(--ink);
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .links-quick-link:hover {
+    color: var(--cobalt);
+    background: color-mix(in srgb, var(--cobalt) 10%, transparent);
+  }
+
+  .links-quick-icon {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .links-btn,
+    .links-btn:hover,
+    .links-btn:active {
+      transform: none;
+    }
   }
 
   .links-footer {

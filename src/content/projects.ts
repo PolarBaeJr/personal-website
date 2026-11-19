@@ -21,7 +21,7 @@ export const projects: Project[] = [
     description:
       "Co-developed the club's web app with a two-person team. Built a custom Elo rating engine for singles and team play, and a payment ledger that matches each e-transfer to its event sign-up (used for 40+ payments).",
     category: "tech",
-    tags: [],
+    tags: ["Web app", "Rating engine", "Payment ledger"],
     links: [
       { kind: "live", href: "https://sfubadminton.com" },
       { kind: "github", href: "https://github.com/PolarBaeJr/rankd" },
@@ -35,7 +35,7 @@ export const projects: Project[] = [
     summary: "Accounting dashboard project.",
     description: "TODO: describe the project.",
     category: "accounting",
-    tags: [],
+    tags: ["Dashboard", "Accounting"],
     links: [
       {
         kind: "github",
@@ -53,7 +53,7 @@ export const projects: Project[] = [
     description:
       "Self-hosted reverse proxy, load balancer and management dashboard, written in Go. Runs my home server.",
     category: "tech",
-    tags: [],
+    tags: ["Reverse proxy", "Go", "Self-hosted"],
     links: [
       { kind: "github", href: "https://github.com/PolarBaeJr/proxy-manager" },
     ],
@@ -68,7 +68,7 @@ export const projects: Project[] = [
     description:
       "TODO: describe the project. Built with Next.js and deployed with Docker behind my homelab proxy-manager.",
     category: "tech",
-    tags: [],
+    tags: ["Website", "Next.js", "Docker"],
     links: [{ kind: "live", href: "https://matthewcheng.net" }],
     featured: false,
     draft: false,
@@ -80,7 +80,7 @@ export const projects: Project[] = [
       "FX and oil price tracker with a Discord bot, running on a Raspberry Pi.",
     description: "TODO: describe the project.",
     category: "tech",
-    tags: [],
+    tags: ["Price tracker", "Discord bot", "Raspberry Pi"],
     links: [
       { kind: "github", href: "https://github.com/PolarBaeJr/market-tracker" },
     ],
@@ -93,7 +93,7 @@ export const projects: Project[] = [
     summary: "Student management dashboard built with Next.js and Supabase.",
     description: "TODO: describe the project.",
     category: "tech",
-    tags: [],
+    tags: ["Dashboard", "Next.js", "Supabase"],
     links: [
       {
         kind: "github",
@@ -102,34 +102,6 @@ export const projects: Project[] = [
     ],
     featured: false,
     draft: false,
-  },
-  {
-    slug: "claude-code-conductor",
-    title: "Claude Code Conductor",
-    summary:
-      "Multi-agent orchestration for Claude Code: plans work, delegates to parallel workers and reviews the results.",
-    description: "TODO: describe the project.",
-    category: "tech",
-    tags: [],
-    links: [
-      {
-        kind: "github",
-        href: "https://github.com/PolarBaeJr/claude-code-conductor",
-      },
-    ],
-    featured: false,
-    draft: false,
-  },
-  {
-    slug: "chaos-cards",
-    title: "Chaos Cards",
-    summary: "TODO: one-line summary.",
-    description: "TODO: describe the project, your role, and the stack.",
-    category: "tech",
-    tags: [],
-    links: [],
-    featured: false,
-    draft: true,
   },
 ];
 

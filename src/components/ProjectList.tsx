@@ -6,13 +6,6 @@ type Props = {
   headingLevel?: "h2" | "h3";
 };
 
-const categories: Record<Project["category"], { label: string; tone: string }> =
-  {
-    accounting: { label: "Accounting", tone: "cobalt" },
-    tech: { label: "Tech", tone: "teal" },
-    other: { label: "Other", tone: "slate" },
-  };
-
 export function ProjectList({ projects, headingLevel = "h3" }: Props) {
   if (projects.length === 0) {
     return <p className="text-slate">No projects yet.</p>;
@@ -23,7 +16,6 @@ export function ProjectList({ projects, headingLevel = "h3" }: Props) {
   return (
     <ul className="row-list">
       {projects.map((project) => {
-        const category = categories[project.category];
         return (
           <li key={project.slug} className="row">
             <Heading className="row-title">
@@ -36,9 +28,15 @@ export function ProjectList({ projects, headingLevel = "h3" }: Props) {
               {project.draft && <span className="badge-draft">Draft</span>}
             </Heading>
             <div className="row-aside">
-              <span className={`pill pill--${category.tone}`}>
-                {category.label}
-              </span>
+              {project.tags.length > 0 && (
+                <ul className="tag-list" aria-label="Tags">
+                  {project.tags.map((tag) => (
+                    <li key={tag} className="tag">
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              )}
               {project.links.map((link) => (
                 <a
                   key={link.href}

@@ -42,9 +42,9 @@ export default function Home() {
           <Link href="/resume" className="btn btn--primary">
             View résumé
           </Link>
-          <a href={`mailto:${site.email}`} className="btn btn--outline">
+          <Link href="/contact" className="btn btn--outline">
             Get in touch
-          </a>
+          </Link>
         </div>
         <TAccount />
       </section>

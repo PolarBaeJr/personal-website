@@ -10,9 +10,22 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+// The menu item that best matches the path: the longest href that matches,
+// so a page never highlights two items at once.
+function activeHref(pathname: string, items: NavGroup["items"]) {
+  let best: string | undefined;
+  for (const item of items) {
+    if (isActive(pathname, item.href) && item.href.length > (best?.length ?? 0)) {
+      best = item.href;
+    }
+  }
+  return best;
+}
+
 // Built on <details>/<summary> so the menu opens natively even before (or
-// without) hydration, e.g. on a slow phone. JS only adds the extras: closing
-// on an outside tap, Escape, focus leaving, or picking an item.
+// without) hydration, e.g. on a slow phone. JS only adds the extras: opening
+// on mouse hover, closing on an outside tap, Escape, focus leaving, or
+// picking an item.
 function NavDropdown({
   group,
   pathname,
@@ -23,12 +36,40 @@ function NavDropdown({
   const [open, setOpen] = useState(false);
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const triggerRef = useRef<HTMLElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const openedByHover = useRef(false);
+  const current =
+    pathname === undefined ? undefined : activeHref(pathname, group.items);
   const groupActive =
     pathname !== undefined &&
-    group.items.some((item) => isActive(pathname, item.href));
+    (current !== undefined ||
+      (group.overview !== undefined && isActive(pathname, group.overview)));
 
   function close() {
+    clearTimeout(closeTimer.current);
+    openedByHover.current = false;
     if (detailsRef.current) detailsRef.current.open = false;
+  }
+
+  // Mouse only: touch and pen keep tap-to-open, since a hover would fire
+  // and then the tap would close the menu straight away.
+  function onPointerEnter(event: React.PointerEvent) {
+    if (event.pointerType !== "mouse") return;
+    clearTimeout(closeTimer.current);
+    const details = detailsRef.current;
+    if (details && !details.open) {
+      openedByHover.current = true;
+      details.open = true;
+    }
+  }
+
+  // A short delay lets the pointer cross the gap between trigger and menu.
+  function onPointerLeave(event: React.PointerEvent) {
+    if (event.pointerType !== "mouse" || !openedByHover.current) return;
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(close, 200);
   }
 
   // `open` mirrors the element via onToggle (an event callback); the effect
@@ -63,6 +104,8 @@ function NavDropdown({
       <details
         ref={detailsRef}
         className="nav-details"
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
         onToggle={(event) => setOpen(event.currentTarget.open)}
         onBlur={(event) => {
           if (
@@ -77,6 +120,14 @@ function NavDropdown({
           ref={triggerRef}
           className="nav-link nav-trigger"
           data-active={groupActive ? "" : undefined}
+          onClick={(event) => {
+            // Already open from hovering: a click keeps it open (and pins
+            // it) instead of toggling it shut under the pointer.
+            if (openedByHover.current) {
+              event.preventDefault();
+              openedByHover.current = false;
+            }
+          }}
           suppressHydrationWarning
         >
           {group.label}
@@ -98,8 +149,7 @@ function NavDropdown({
         </summary>
         <ul className="nav-menu">
           {group.items.map((item) => {
-            const active =
-              pathname !== undefined && isActive(pathname, item.href);
+            const active = item.href === current;
             return (
               <li key={item.href}>
                 <Link

@@ -6,6 +6,9 @@ export type NavItem = {
 export type NavGroup = {
   label: string;
   items: NavItem[];
+  // A page that sums the group up. The footer links to it instead of
+  // listing every item; the header menu leaves it out.
+  overview?: string;
 };
 
 export type NavEntry = NavItem | NavGroup;
@@ -105,7 +108,17 @@ export const nav: NavEntry[] = [
     ],
   },
   { label: "Projects", href: "/projects" },
-  { label: "Résumé", href: "/resume" },
+  {
+    label: "Résumé",
+    overview: "/resume",
+    items: [
+      { label: "Accounting", href: "/resume/accounting" },
+      { label: "Auditing", href: "/resume/auditing" },
+      { label: "Finance", href: "/resume/finance" },
+      { label: "Tech", href: "/resume/tech" },
+      { label: "General", href: "/resume/general" },
+    ],
+  },
   { label: "Playground", href: "/playground" },
 ];
 
@@ -113,9 +126,12 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "items" in entry;
 }
 
-export const navPages: NavItem[] = nav.flatMap((entry) =>
-  isNavGroup(entry) ? entry.items : [entry],
-);
+export const navPages: NavItem[] = nav.flatMap((entry) => {
+  if (!isNavGroup(entry)) return [entry];
+  return entry.overview
+    ? [{ label: entry.label, href: entry.overview }]
+    : entry.items;
+});
 
 // "https://github.com/PolarBaeJr" -> "github.com/PolarBaeJr"
 export function displayUrl(href: string): string {

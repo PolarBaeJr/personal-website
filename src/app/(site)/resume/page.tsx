@@ -14,7 +14,6 @@ export default function ResumePage() {
     <div className="stack">
       <div className="flow">
         <h1 className="page-title">Résumé</h1>
-        <p className="lede">Pick the version that fits.</p>
         <ul className="row-list">
           {RESUME_TYPES.map((type) => {
             const meta = getVariantMeta(type);

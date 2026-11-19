@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/content/site";
+import { CopyIconButton } from "@/components/CopyIconButton";
+import { SocialIcon } from "@/components/SocialIcon";
 import { socials, type Social } from "@/content/socials";
 
 export const metadata: Metadata = {
@@ -13,16 +15,23 @@ const initials = site.name
   .map((word) => word[0])
   .join("");
 
-function className(social: Social) {
-  if (social.kind === "primary") return "links-btn links-btn--primary";
-  return social.accent ? `links-btn links-btn--${social.accent}` : "links-btn";
-}
-
-function SocialLink({ social }: { social: Social }) {
+// Internal pages use <Link>; everything else is a plain anchor, opened in
+// a new tab when it leaves the site.
+function SocialAnchor({
+  social,
+  className,
+  children,
+  label,
+}: {
+  social: Social;
+  className: string;
+  children: React.ReactNode;
+  label?: string;
+}) {
   if (social.href.startsWith("/")) {
     return (
-      <Link href={social.href} className={className(social)}>
-        {social.label}
+      <Link href={social.href} className={className} aria-label={label}>
+        {children}
       </Link>
     );
   }
@@ -30,11 +39,12 @@ function SocialLink({ social }: { social: Social }) {
   return (
     <a
       href={social.href}
-      className={className(social)}
+      className={className}
+      aria-label={label}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
     >
-      {social.label}
+      {children}
     </a>
   );
 }
@@ -59,12 +69,41 @@ export default function SocialsPage() {
         <h1 className="links-name">{site.name}</h1>
         <p className="links-tagline">{site.tagline}</p>
         <p className="links-location">{site.location}</p>
+        <ul className="links-quick">
+          {socials
+            .filter((social) => social.quick)
+            .map((social) => (
+              <li key={social.label}>
+                <SocialAnchor
+                  social={social}
+                  className="links-quick-link"
+                  label={social.label}
+                >
+                  <SocialIcon name={social.icon} className="links-quick-icon" />
+                </SocialAnchor>
+              </li>
+            ))}
+        </ul>
       </div>
 
       <ul className="links-list">
         {socials.map((social) => (
-          <li key={social.label}>
-            <SocialLink social={social} />
+          <li key={social.label} className="links-item">
+            <SocialAnchor social={social} className="links-btn">
+              <SocialIcon name={social.icon} className="links-btn-icon" />
+              <span className="links-btn-text">
+                <span className="links-btn-label">{social.label}</span>
+                {social.copy && (
+                  <span className="links-btn-sub">{social.copy}</span>
+                )}
+              </span>
+            </SocialAnchor>
+            {social.copy && (
+              <CopyIconButton
+                text={social.copy}
+                label={`Copy ${social.copy}`}
+              />
+            )}
           </li>
         ))}
       </ul>

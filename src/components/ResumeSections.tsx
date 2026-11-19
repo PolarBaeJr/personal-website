@@ -28,6 +28,29 @@ function skillSide(kind: SkillLine["kind"], variantSide: Side): Side {
   return variantSide;
 }
 
+// Certifications are long names, so they read as plain text; everything
+// else is a short skill and shows as a pill.
+function SkillLineBody({ line, tone }: { line: SkillLine; tone: string }) {
+  if (line.kind === "certifications") {
+    return (
+      <ul className="skill-text-list">
+        {skillItems(line).map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <span className="pill-list">
+      {skillItems(line).map((item) => (
+        <span key={item} className={`pill pill--${tone} pill--wrap`}>
+          {item}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function dates(start?: string, end?: string) {
   if (!start) return null;
   return end ? `${start}–${end}` : start;
@@ -112,6 +135,19 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
         (sum, line) => sum + skillItems(line).length,
         0,
       );
+      if (accounting.length === 0 || building.length === 0) {
+        const tone = accounting.length > 0 ? "cobalt" : "teal";
+        return (
+          <ul className="skill-plain">
+            {resume.skills.map((line) => (
+              <li key={`${line.label}-${line.text}`} className="taccount-skill">
+                <span className="skill-label">{line.label}</span>
+                <SkillLineBody line={line} tone={tone} />
+              </li>
+            ))}
+          </ul>
+        );
+      }
       return (
         <div className="taccount taccount--compact">
           <h3 className="taccount-label taccount-label--accounting">
@@ -124,13 +160,7 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
               accounting.map((line) => (
                 <li key={`${line.label}-${line.text}`} className="taccount-skill">
                   <span className="skill-label">{line.label}</span>
-                  <span className="pill-list">
-                    {skillItems(line).map((item) => (
-                      <span key={item} className="pill pill--cobalt pill--wrap">
-                        {item}
-                      </span>
-                    ))}
-                  </span>
+                  <SkillLineBody line={line} tone="cobalt" />
                 </li>
               ))
             ) : (
@@ -142,13 +172,7 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
               building.map((line) => (
                 <li key={`${line.label}-${line.text}`} className="taccount-skill">
                   <span className="skill-label">{line.label}</span>
-                  <span className="pill-list">
-                    {skillItems(line).map((item) => (
-                      <span key={item} className="pill pill--teal pill--wrap">
-                        {item}
-                      </span>
-                    ))}
-                  </span>
+                  <SkillLineBody line={line} tone="teal" />
                 </li>
               ))
             ) : (
@@ -165,11 +189,9 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
     }
     case "languages":
       return (
-        <ul className="pill-list">
+        <ul className="skill-text-list">
           {resume.languages.map((language) => (
-            <li key={language} className="pill pill--slate">
-              {language}
-            </li>
+            <li key={language}>{language}</li>
           ))}
         </ul>
       );
