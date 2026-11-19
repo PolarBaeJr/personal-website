@@ -87,14 +87,14 @@ if ! ssh "${PI_HOST}" "grep -qE '^RESUME_API_TOKEN=.+' ${REMOTE_DIR}/.env 2>/dev
     warn "${REMOTE_DIR}/.env on ${PI_HOST} has no RESUME_API_TOKEN; the résumé API will answer 503. Add it, or rerun with --push-env."
 fi
 if ! ssh "${PI_HOST}" "grep -qE '^RESUME_PHONE=.+' ${REMOTE_DIR}/.env 2>/dev/null && grep -qE '^RESUME_ADDRESS=.+' ${REMOTE_DIR}/.env 2>/dev/null"; then
-    warn "${REMOTE_DIR}/.env on ${PI_HOST} lacks RESUME_PHONE or RESUME_ADDRESS; résumé updates through the API will answer 503."
+    warn "${REMOTE_DIR}/.env on ${PI_HOST} lacks RESUME_PHONE or RESUME_ADDRESS; private résumé PDFs will leave them out."
 fi
 
 # --- build / start ---------------------------------------------------------
 
 if [[ "${START}" == 1 ]]; then
     info "Building and starting the container on the Pi (first build takes a few minutes)"
-    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose up -d --build --remove-orphans"
+    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose up -d --build" || die "build or start failed on the Pi"
 else
     info "Building only (--no-start)"
     ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose build"

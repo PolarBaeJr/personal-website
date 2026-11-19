@@ -5,7 +5,11 @@
 
 # ---- tectonic ----------------------------------------------------------
 # Pinned release binary (static musl build) for the target architecture.
-FROM node:24-bookworm-slim AS tectonic
+# Official Node image via the AWS public mirror: Docker Hub rate-limits
+# anonymous pulls (429) and the Pi hit it. Override with --build-arg NODE_IMAGE=...
+ARG NODE_IMAGE=public.ecr.aws/docker/library/node:24-bookworm-slim
+
+FROM ${NODE_IMAGE} AS tectonic
 ARG TECTONIC_VERSION=0.17.0
 ARG TARGETARCH
 RUN apt-get update \
@@ -23,7 +27,7 @@ RUN case "$TARGETARCH" in \
  && /usr/local/bin/tectonic --version
 
 # ---- build -------------------------------------------------------------
-FROM node:24-bookworm-slim AS build
+FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -35,7 +39,7 @@ RUN npm run build \
  && npm prune --omit=dev
 
 # ---- run ---------------------------------------------------------------
-FROM node:24-bookworm-slim AS run
+FROM ${NODE_IMAGE} AS run
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \

@@ -5,12 +5,18 @@
 #
 # Routed by proxy-manager via the labels below. No nginx config needed.
 
+# Explicit project name: without it compose names the project after this
+# folder ("docker"), which other apps on the Pi share, and --remove-orphans
+# would delete their containers.
+name: personal-page
+
 networks:
   edge:
     external: true
 
 volumes:
   personal-page-data:
+    name: personal-page-data
 
 services:
   personal-page:
