@@ -54,15 +54,13 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 COPY --from=tectonic /usr/local/bin/tectonic /usr/local/bin/tectonic
 
-# Only what `next start` needs at runtime, plus the résumé sources and the
-# plain-node scripts (seed, import) with the store code they import.
+# Only what `next start` needs at runtime, plus the plain-node scripts (seed, import) with the store code they import.
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/content ./content
 COPY --from=build /app/next.config.ts ./next.config.ts
-COPY --from=build /app/resumes ./resumes
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/src/lib/resume-store ./src/lib/resume-store
 COPY --from=build /app/src/lib/resume-types.ts ./src/lib/resume-types.ts
@@ -76,10 +74,8 @@ USER node
 
 # Warm tectonic's bundle and format cache as the node user, so runtime
 # compiles are fast and the cache stays writable by the app.
-RUN mkdir /tmp/warm \
- && for t in accounting auditing finance tech general; do \
-      tectonic -X compile --untrusted --outdir /tmp/warm "/app/resumes/$t.tex" || exit 1; \
-    done \
+COPY --chown=node:node docker/warm.tex /tmp/warm/warm.tex
+RUN tectonic -X compile --untrusted --outdir /tmp/warm /tmp/warm/warm.tex \
  && rm -rf /tmp/warm
 
 EXPOSE 3000

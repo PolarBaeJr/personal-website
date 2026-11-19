@@ -1,0 +1,26 @@
+% Warms tectonic's bundle and format cache during `docker build` so runtime
+% résumé compiles don't download anything. Loads the same packages as the
+% Jake's-template résumés (which are kept out of the public repo).
+\documentclass[letterpaper,11pt]{article}
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\ifdefined\pdfgentounicode\input{glyphtounicode}\pdfgentounicode=1\fi
+\pagestyle{fancy}
+\begin{document}
+\section{Warm}
+\begin{itemize}[leftmargin=0.15in]
+  \item \textbf{Bold}, \textit{italic}, \small{small}, \href{https://example.com}{\underline{link}} \$ \& \%
+\end{itemize}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{Left} & Right \\
+\end{tabular*}
+\end{document}

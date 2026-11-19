@@ -2,9 +2,14 @@
 #
 # Deploy the personal site to the Raspberry Pi.
 #
-#   ./docker/deploy.sh              # sync + build + start
-#   ./docker/deploy.sh --no-start   # sync + build only
+#   ./docker/deploy.sh              # sync compose/.env, pull the ghcr image, start
+#   ./docker/deploy.sh --build      # build the image on the Pi instead of pulling
+#   ./docker/deploy.sh --no-start   # sync + pull (or build) only
 #   ./docker/deploy.sh --push-env   # also copy local .env to the Pi
+#
+# Normally you don't need this: pushing to main builds
+# ghcr.io/polarbaejr/personal-website:latest in GitHub Actions and the
+# dashboard auto-updates the container. Use it for .env or compose changes.
 #   PI_HOST=pi ./docker/deploy.sh   # force one ssh host (default: first of pi, pi-lan, pi-remote that answers)
 #
 # Requires: ssh access to the Pi, plus docker and the compose plugin on it.
@@ -32,11 +37,13 @@ LOCAL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 START=1
 PUSH_ENV=0
+BUILD=0
 for arg in "$@"; do
     case "${arg}" in
         --no-start) START=0 ;;
         --push-env) PUSH_ENV=1 ;;
-        -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+        --build) BUILD=1 ;;
+        -h|--help) sed -n '2,19p' "$0"; exit 0 ;;
         *) echo "unknown option: ${arg}" >&2; exit 64 ;;
     esac
 done
@@ -73,6 +80,7 @@ rsync -az --delete \
     --exclude '.env' \
     --exclude '.env.*' \
     --exclude 'data/' \
+    --exclude 'resumes/' \
     --exclude '.DS_Store' \
     "${LOCAL_DIR}/" "${PI_HOST}:${REMOTE_DIR}/"
 
@@ -92,12 +100,18 @@ fi
 
 # --- build / start ---------------------------------------------------------
 
-if [[ "${START}" == 1 ]]; then
-    info "Building and starting the container on the Pi (first build takes a few minutes)"
-    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose up -d --build" || die "build or start failed on the Pi"
+if [[ "${BUILD}" == 1 ]]; then
+    info "Building the image on the Pi (takes a few minutes)"
+    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose build" || die "build failed on the Pi"
 else
-    info "Building only (--no-start)"
-    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose build"
+    info "Pulling the latest image from ghcr"
+    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose pull" || die "pull failed on the Pi"
+fi
+
+if [[ "${START}" == 1 ]]; then
+    info "Starting the container"
+    ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose up -d --no-build" || die "start failed on the Pi"
+else
     exit 0
 fi
 

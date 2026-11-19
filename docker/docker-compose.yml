@@ -20,10 +20,13 @@ volumes:
 
 services:
   personal-page:
+    # Built by .github/workflows/build-image.yml on every push to main; the
+    # dashboard auto-updates the container when a new digest appears.
+    # `deploy.sh --build` builds it on the Pi instead.
+    image: ghcr.io/polarbaejr/personal-website:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: personal-page:latest
     container_name: personal-page
     restart: unless-stopped
     networks: [edge]
