@@ -7,6 +7,7 @@ import {
   readJsonBody,
   readNote,
   readVersionField,
+  requestActor,
 } from "@/lib/resume-api";
 import { restoreSection } from "@/lib/write/content";
 import { writeResponse } from "@/lib/write/result";
@@ -30,7 +31,7 @@ export async function POST(
     if (versionNo instanceof Response) return versionNo;
     const extra = readNote(note);
     if (extra instanceof Response) return extra;
-    return writeResponse(restoreSection(section, versionNo, extra, "api"));
+    return writeResponse(restoreSection(section, versionNo, extra, requestActor(req)));
   } catch (e) {
     logError("POST /api/content/[section]/restore", e);
     return json({ error: "internal" }, 500);

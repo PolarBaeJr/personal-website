@@ -1,7 +1,8 @@
 // MCP tools for the site's token-protected API: résumés, content sections
-// and blog posts. Shared by the stdio server in mcp/ and later servers, so
-// relative imports and packages only (no "@/", next/* or server-only), and
-// it must type-check under both the root and mcp/ tsconfigs. The
+// and blog posts. Shared by the stdio server in mcp/ and the remote server
+// at src/app/mcp (through src/lib/mcp/remote.ts), so relative imports and
+// packages only (no "@/", next/* or server-only), and it must type-check
+// under both the root and mcp/ tsconfigs. The
 // package.json next to this file marks it as an ES module for node.
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
@@ -25,6 +26,8 @@ export type ToolOptions = {
 
 // Thrown by call() for problems worth showing as-is (no token, network).
 export class ApiError extends Error {}
+
+const MAX_EMBED_BYTES = 4 * 1024 * 1024;
 
 const type = z
   .enum(["accounting", "auditing", "finance", "tech", "general"])
@@ -199,7 +202,13 @@ export function registerTools(server: McpServer, { call, pdf }: ToolOptions): vo
         if (!res.ok) return httpError(res);
         const bytes = new Uint8Array(await res.arrayBuffer());
         const pages = res.headers.get("x-resume-pages");
-        const result: { ok: true; pages: number | null; bytes: number; path?: string } = {
+        const result: {
+          ok: true;
+          pages: number | null;
+          bytes: number;
+          path?: string;
+          note?: string;
+        } = {
           ok: true,
           pages: pages ? Number(pages) : null,
           bytes: bytes.byteLength,
@@ -208,8 +217,10 @@ export function registerTools(server: McpServer, { call, pdf }: ToolOptions): vo
           result.path = path.join(os.tmpdir(), `resume-preview-${type}-${randomUUID()}.pdf`);
           await fs.writeFile(result.path, bytes);
         }
+        const tooBig = save_pdf && pdf === "embed" && bytes.byteLength > MAX_EMBED_BYTES;
+        if (tooBig) result.note = "PDF too large to include";
         const summary = text(result);
-        if (save_pdf && pdf === "embed") {
+        if (save_pdf && pdf === "embed" && !tooBig) {
           summary.content.push({
             type: "resource",
             resource: {

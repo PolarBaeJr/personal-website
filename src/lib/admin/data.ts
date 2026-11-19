@@ -13,6 +13,7 @@ import {
   sectionsWithHistory,
   type ContentMeta,
 } from "@/lib/content-store/db";
+import { listConnectedApps } from "@/lib/content-store/oauth";
 import {
   validatePost,
   validateSection,
@@ -103,4 +104,31 @@ export function today(): string {
     .prepare("SELECT date('now', 'localtime') AS d")
     .get() as { d: string };
   return row.d;
+}
+
+export type ConnectedApp = {
+  id: string;
+  name: string;
+  hosts: string[];
+  connectedAt: string;
+  lastUsedAt: string | null;
+};
+
+// Apps with a live OAuth grant, for Admin, Connected apps.
+export function loadConnectedApps(): ConnectedApp[] {
+  return listConnectedApps(getWriteContentDb()).map((row) => {
+    const hosts = new Set<string>();
+    for (const uri of JSON.parse(row.redirect_uris) as string[]) {
+      try {
+        hosts.add(new URL(uri).host);
+      } catch {}
+    }
+    return {
+      id: row.id,
+      name: row.name,
+      hosts: [...hosts],
+      connectedAt: row.connected_at,
+      lastUsedAt: row.last_used_at,
+    };
+  });
 }

@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { clientIpFrom } from "@/lib/client-ip";
 import { getWriteContentDb } from "@/lib/content-data";
 import {
   createSession,
@@ -56,13 +57,8 @@ export async function requireOwner(csrf?: unknown): Promise<Owner> {
   return owner;
 }
 
-// Cloudflare's header first, then the first proxy hop.
 async function clientIp(): Promise<string> {
-  const h = await headers();
-  const cf = h.get("cf-connecting-ip")?.trim();
-  if (cf) return cf;
-  const forwarded = h.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || "unknown";
+  return clientIpFrom(await headers());
 }
 
 function wait(ms: number) {

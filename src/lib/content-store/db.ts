@@ -59,7 +59,7 @@ function toMeta(row: MetaRow): ContentMeta {
   };
 }
 
-function transaction<T>(db: DatabaseSync, fn: () => T): T {
+export function transaction<T>(db: DatabaseSync, fn: () => T): T {
   db.exec("BEGIN IMMEDIATE");
   try {
     const result = fn();
@@ -88,8 +88,49 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 CREATE INDEX IF NOT EXISTS login_attempts_by_at ON login_attempts(at);
 `;
 
+// OAuth for connected apps (the Claude app): registered clients, one-time
+// authorization codes and one token row per grant. Secrets are stored as
+// sha256 hex only. Times are SQLite's (UTC).
+const OAUTH_SCHEMA = `
+CREATE TABLE IF NOT EXISTS oauth_clients (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  redirect_uris TEXT NOT NULL,
+  auth_method TEXT NOT NULL DEFAULT 'none',
+  secret_hash TEXT,
+  created_ip TEXT NOT NULL DEFAULT 'unknown',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS oauth_clients_by_created ON oauth_clients(created_at);
+CREATE TABLE IF NOT EXISTS oauth_codes (
+  hash TEXT PRIMARY KEY,
+  client_id TEXT NOT NULL REFERENCES oauth_clients(id) ON DELETE CASCADE,
+  redirect_uri TEXT NOT NULL,
+  challenge TEXT NOT NULL,
+  resource TEXT,
+  owner_tag TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used INTEGER NOT NULL DEFAULT 0,
+  token_id INTEGER,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS oauth_tokens (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  client_id TEXT NOT NULL REFERENCES oauth_clients(id) ON DELETE CASCADE,
+  access_hash TEXT NOT NULL UNIQUE,
+  refresh_hash TEXT NOT NULL UNIQUE,
+  owner_tag TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  refresh_expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_used_at TEXT,
+  revoked INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS oauth_tokens_by_client ON oauth_tokens(client_id);
+`;
+
 // MIGRATIONS[i] takes user_version i to i + 1.
-const MIGRATIONS = [SCHEMA, OWNER_SCHEMA];
+const MIGRATIONS = [SCHEMA, OWNER_SCHEMA, OAUTH_SCHEMA];
 
 function migrate(db: DatabaseSync) {
   const version = () =>

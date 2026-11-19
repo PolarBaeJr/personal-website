@@ -1,7 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { ensureContentSeeded } from "@/lib/content-data";
+import { ensureContentSeeded, getWriteContentDb } from "@/lib/content-data";
+import { deleteAllOAuthGrants, revokeClient } from "@/lib/content-store/oauth";
 import { isSectionName } from "@/lib/content-store/schema";
 import { SIGNED_OUT, type FormState } from "@/lib/admin/form-state";
 import { checkOwner } from "@/lib/owner";
@@ -219,4 +220,27 @@ export async function rebuildResumeAction(
   } catch (e) {
     return failed("rebuild resume", e);
   }
+}
+
+// Admin, Connected apps. Plain form actions: they redirect back to the list.
+export async function disconnectAppAction(formData: FormData): Promise<void> {
+  if (await checkOwner(formData.get("csrf"))) {
+    try {
+      revokeClient(getWriteContentDb(), text(formData, "client_id"));
+    } catch (e) {
+      console.error(`admin disconnect app: ${(e as Error).message}`);
+    }
+  }
+  redirect("/admin/connected-apps");
+}
+
+export async function disconnectAllAppsAction(formData: FormData): Promise<void> {
+  if (await checkOwner(formData.get("csrf"))) {
+    try {
+      deleteAllOAuthGrants(getWriteContentDb());
+    } catch (e) {
+      console.error(`admin disconnect all apps: ${(e as Error).message}`);
+    }
+  }
+  redirect("/admin/connected-apps");
 }

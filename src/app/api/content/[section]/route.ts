@@ -8,6 +8,7 @@ import {
   readJsonBody,
   readNote,
   readVersionField,
+  requestActor,
 } from "@/lib/resume-api";
 import { saveSection } from "@/lib/write/content";
 import { writeResponse } from "@/lib/write/result";
@@ -49,7 +50,7 @@ export async function POST(req: Request, ctx: Ctx) {
     if (cleanNote instanceof Response) return cleanNote;
     const base = readVersionField(baseVersion, "baseVersion", true);
     if (base instanceof Response) return base;
-    return writeResponse(saveSection(section, data, cleanNote, "api", base));
+    return writeResponse(saveSection(section, data, cleanNote, requestActor(req), base));
   } catch (e) {
     logError("POST /api/content/[section]", e);
     return json({ error: "internal" }, 500);

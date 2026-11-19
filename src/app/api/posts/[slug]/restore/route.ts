@@ -6,6 +6,7 @@ import {
   readJsonBody,
   readNote,
   readVersionField,
+  requestActor,
 } from "@/lib/resume-api";
 import { checkSlug, restorePost } from "@/lib/write/posts";
 import { writeResponse } from "@/lib/write/result";
@@ -28,7 +29,7 @@ export async function POST(
     if (versionNo instanceof Response) return versionNo;
     const extra = readNote(note);
     if (extra instanceof Response) return extra;
-    return writeResponse(restorePost(slug, versionNo, extra, "api"));
+    return writeResponse(restorePost(slug, versionNo, extra, requestActor(req)));
   } catch (e) {
     logError("POST /api/posts/[slug]/restore", e);
     return json({ error: "internal" }, 500);

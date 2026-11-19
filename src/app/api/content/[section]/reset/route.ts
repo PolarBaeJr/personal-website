@@ -7,6 +7,7 @@ import {
   MAX_BODY_BYTES,
   readBodyLimited,
   readNote,
+  requestActor,
 } from "@/lib/resume-api";
 import { resetSectionToSeed } from "@/lib/write/content";
 import { writeResponse } from "@/lib/write/result";
@@ -35,7 +36,7 @@ export async function POST(
     }
     const cleanNote = readNote(note);
     if (cleanNote instanceof Response) return cleanNote;
-    return writeResponse(resetSectionToSeed(section, cleanNote, "api"));
+    return writeResponse(resetSectionToSeed(section, cleanNote, requestActor(req)));
   } catch (e) {
     logError("POST /api/content/[section]/reset", e);
     return json({ error: "internal" }, 500);

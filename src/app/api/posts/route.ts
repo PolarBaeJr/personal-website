@@ -1,7 +1,7 @@
 import { ensureContentSeeded, getWriteContentDb } from "@/lib/content-data";
 import { listCurrentContent, sectionsWithHistory } from "@/lib/content-store/db";
 import type { PostData } from "@/lib/content-store/schema";
-import { authorize, json, logError, readJsonBody, readNote } from "@/lib/resume-api";
+import { authorize, json, logError, readJsonBody, readNote, requestActor } from "@/lib/resume-api";
 import { createPost } from "@/lib/write/posts";
 import { writeResponse } from "@/lib/write/result";
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     if (typeof slug !== "string") return json({ error: "slug is required" }, 400);
     const cleanNote = readNote(note);
     if (cleanNote instanceof Response) return cleanNote;
-    return writeResponse(createPost(slug, data, cleanNote, "api"));
+    return writeResponse(createPost(slug, data, cleanNote, requestActor(req)));
   } catch (e) {
     logError("POST /api/posts", e);
     return json({ error: "internal" }, 500);

@@ -130,5 +130,6 @@ export function actorLabel(actor: string): string {
   if (actor === "admin") return "You (admin)";
   if (actor === "seed") return "Starting copy";
   if (actor === "api") return "API";
+  if (actor === "claude-app") return "Claude (connected app)";
   return actor;
 }

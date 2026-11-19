@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { postExists, projectExists } from "@/lib/content-data";
-import { COOKIE_NAME, COOKIE_OPTIONS, sessionForToken } from "@/lib/owner-session";
+import { checkAuthorizeRequest } from "@/lib/oauth/authorize";
+import { COOKIE_NAME, COOKIE_OPTIONS, ownerHash, sessionForToken } from "@/lib/owner-session";
 import { isResumeType } from "@/lib/resume-types";
+import { siteOrigin } from "@/lib/site-url";
 
 // With Cache Components, dynamic routes stream their prerendered shell before
 // the page's notFound() runs, which fixes the status at 200. Check the param
@@ -12,6 +14,9 @@ import { isResumeType } from "@/lib/resume-types";
 // drafts.
 // /admin is a 404 to anyone without a live owner session; the pages and
 // actions check the session again themselves.
+// /oauth/authorize (connecting an app) does its redirects here, so they are
+// real 3xx: signed out goes to /login, and a bad request goes back to the
+// app's redirect URI with an error. The page checks again and only renders.
 export function proxy(request: NextRequest) {
   const [, section, rawSlug] = request.nextUrl.pathname.split("/");
   const token = request.cookies.get(COOKIE_NAME)?.value;
@@ -25,6 +30,22 @@ export function proxy(request: NextRequest) {
     // page loads: a POST may be sign out, which clears it.
     const response = NextResponse.next();
     if (request.method === "GET") response.cookies.set(COOKIE_NAME, token, COOKIE_OPTIONS);
+    return response;
+  }
+
+  if (section === "oauth") {
+    if (request.method !== "GET" || !ownerHash()) return NextResponse.next();
+    if (!token || !isOwner()) {
+      const next = request.nextUrl.pathname + request.nextUrl.search;
+      return NextResponse.redirect(
+        new URL("/login?next=" + encodeURIComponent(next), siteOrigin()),
+        307,
+      );
+    }
+    const check = checkAuthorizeRequest(request.nextUrl.searchParams);
+    if (check.kind === "redirect") return NextResponse.redirect(check.url, 302);
+    const response = NextResponse.next();
+    response.cookies.set(COOKIE_NAME, token, COOKIE_OPTIONS);
     return response;
   }
 
@@ -60,5 +81,6 @@ export const config = {
     "/resume/:type/document",
     "/admin",
     "/admin/:path*",
+    "/oauth/authorize",
   ],
 };

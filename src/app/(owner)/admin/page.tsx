@@ -20,6 +20,11 @@ const PLACES = [
   { href: "/admin/posts", title: "Blog posts", text: "Write, edit and delete posts." },
   { href: "/admin/socials", title: "Links page", text: "The rows on /socials." },
   { href: "/admin/resume", title: "Résumés", text: "Versions and PDFs." },
+  {
+    href: "/admin/connected-apps",
+    title: "Connected apps",
+    text: "Apps like Claude that can edit your site.",
+  },
 ];
 
 function historyHref(section: string): string {

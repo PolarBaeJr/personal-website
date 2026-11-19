@@ -38,6 +38,12 @@ export function authorize(req: Request): Response | null {
   });
 }
 
+// Who made a write, for the history. Only call after authorize(): just
+// holders of the API token can set x-actor, and only to a known value.
+export function requestActor(req: Request): string {
+  return req.headers.get("x-actor") === "claude-app" ? "claude-app" : "api";
+}
+
 function tooLarge() {
   return json({ error: "too_large", maxBytes: MAX_BODY_BYTES }, 413);
 }

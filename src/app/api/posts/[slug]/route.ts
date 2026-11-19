@@ -11,6 +11,7 @@ import {
   readJsonBody,
   readNote,
   readVersionField,
+  requestActor,
 } from "@/lib/resume-api";
 import { checkSlug, deletePost, updatePost } from "@/lib/write/posts";
 import { writeResponse } from "@/lib/write/result";
@@ -59,7 +60,7 @@ export async function PUT(req: Request, ctx: Ctx) {
     if (cleanNote instanceof Response) return cleanNote;
     const base = readVersionField(baseVersion, "baseVersion", true);
     if (base instanceof Response) return base;
-    return writeResponse(updatePost(slug, data, cleanNote, "api", base));
+    return writeResponse(updatePost(slug, data, cleanNote, requestActor(req), base));
   } catch (e) {
     logError("PUT /api/posts/[slug]", e);
     return json({ error: "internal" }, 500);
