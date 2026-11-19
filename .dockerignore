@@ -9,3 +9,4 @@ docker/*.sh
 !docker/entrypoint.sh
 .DS_Store
 npm-debug.log*
+integrations

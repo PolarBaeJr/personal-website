@@ -52,3 +52,6 @@ services:
       proxy.unscalable: "true"   # single instance (SQLite)
       proxy.health:     "/"
       proxy.name:       "Personal site"
+      # Served (as a 503) while the host is in maintenance mode. The same file
+      # backs the Cloudflare Worker in integrations/cloudflare-error-page.
+      proxy.maintenance: "/app/public/503.html"

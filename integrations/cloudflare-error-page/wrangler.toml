@@ -1,0 +1,15 @@
+# Deploy: cd integrations/cloudflare-error-page && npx wrangler@4 deploy
+name = "matthewcheng-error-page"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+# The page is imported from public/503.html as a text module, so the Worker
+# and proxy-manager's maintenance mode serve the same file.
+rules = [
+  { type = "Text", globs = ["**/*.html"], fallthrough = false },
+]
+
+routes = [
+  { pattern = "matthewcheng.net/*", zone_name = "matthewcheng.net" },
+]
