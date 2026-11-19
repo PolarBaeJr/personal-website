@@ -64,6 +64,9 @@ export const clubs: Club[] = [
   },
   // Source: resume.ts education[0] details ("Member: Accounting Student Association.").
   { name: "Accounting Student Association", role: "Member" },
+  { name: "Management Information Systems Association (MISA)", role: "Member" },
+  { name: "Economics Society", role: "Member" },
+  { name: "Hong Kong Society", role: "Member" },
   // { name: "Club name", role: "Role", start: "Mon YYYY", end: "Mon YYYY" },
 ];
 
