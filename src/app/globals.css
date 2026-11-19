@@ -769,50 +769,23 @@
     }
   }
 
-  /* Scroll-linked keyframes only move things, never hide them: Safari can
-     leave a view timeline stuck at its start, and a stuck fade made rows
-     look like the page had stopped loading. */
-  @keyframes exp-reveal {
-    from {
-      translate: 0 1.25rem;
-    }
+  /* Line-by-line reveal, driven by ScrollReveal (IntersectionObserver).
+     Lines are hidden only once the component has armed the list, so the
+     content is always readable without JS. ScrollReveal sets each line's
+     transition-delay so a batch plays top to bottom. */
+  .reveal-armed :is(.dated-row-date, .journal-debit, .journal-credit, .dated-row-bullet) {
+    transition:
+      opacity 450ms ease-out,
+      translate 450ms ease-out;
   }
 
-  @keyframes exp-reveal-item {
-    from {
-      translate: 0 0.5rem;
-    }
-  }
-
-  /* Bullets share their row's named view timeline so they reveal with it,
-     starting a little later in the entry range. */
-  /* Home page only: résumé pages are for reading and render still. */
-  @supports (animation-timeline: view()) {
-    .home-experience .dated-row {
-      view-timeline: --exp-row block;
-      animation: exp-reveal ease-out both;
-      animation-timeline: --exp-row;
-      animation-range: entry 0% entry 100%;
-    }
-
-    .home-experience .dated-row-bullet {
-      animation: exp-reveal-item ease-out both;
-      animation-timeline: --exp-row;
-      animation-range: entry 25% entry 100%;
-    }
-
-    .home-experience .journal-credit {
-      animation: exp-reveal-item ease-out both;
-      animation-timeline: --exp-row;
-      animation-range: entry 10% entry 85%;
-    }
+  .reveal-armed :is(.dated-row-date, .journal-debit, .journal-credit, .dated-row-bullet):not([data-shown]) {
+    opacity: 0;
+    translate: 0 0.75rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .home-experience,
-    .dated-row,
-    .dated-row-bullet,
-    .journal-credit {
+    .home-experience {
       animation: none;
     }
   }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { TestimonialsSection } from "@/components/AboutSections";
 import { ExperienceRows } from "@/components/ExperienceRows";
 import { ProjectList } from "@/components/ProjectList";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { TAccount } from "@/components/TAccount";
 import { getFeaturedProjects } from "@/content/projects";
 import { site } from "@/content/site";
@@ -14,10 +15,14 @@ export const metadata: Metadata = {
   title: { absolute: site.name },
 };
 
-async function HomeExperience() {
+async function HomeExperience({ revealDelayMs }: { revealDelayMs: number }) {
   await io();
   const { experience } = await getResume("general");
-  return <ExperienceRows experience={experience} />;
+  return (
+    <ScrollReveal initialDelayMs={revealDelayMs}>
+      <ExperienceRows experience={experience} />
+    </ScrollReveal>
+  );
 }
 
 export default function Home() {
@@ -25,6 +30,9 @@ export default function Home() {
   // animation-delay in CSS can wait until the T-account has finished.
   const taItems = site.balance.accounting.length + site.balance.building.length;
   const now = site.now?.trim();
+  // Lines already on screen start revealing just after the section itself
+  // has faded in (matches the .home-experience animation-delay in CSS).
+  const revealDelayMs = 1300 + (taItems - 1) * 70 + 300;
 
   return (
     <div className="stack">
@@ -60,7 +68,7 @@ export default function Home() {
           </Link>
         </div>
         <Suspense fallback={<p className="text-slate">Loading…</p>}>
-          <HomeExperience />
+          <HomeExperience revealDelayMs={revealDelayMs} />
         </Suspense>
       </section>
 
