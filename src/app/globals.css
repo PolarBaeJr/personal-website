@@ -1653,6 +1653,40 @@
     font-size: 0.875rem;
   }
 
+  /* Résumé version switcher: every version as a tab, current one filled. */
+  .version-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .version-tab {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--slate);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: color 150ms, border-color 150ms;
+  }
+
+  .version-tab:hover {
+    border-color: var(--cobalt);
+    color: var(--cobalt);
+  }
+
+  .version-tab[aria-current="page"] {
+    border-color: var(--cobalt);
+    background: var(--cobalt);
+    color: var(--on-cobalt);
+  }
+
   /* Links page (/socials) */
   .links-page {
     flex: 1;

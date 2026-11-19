@@ -27,11 +27,21 @@ export default async function ResumeVariantPage({
 
   return (
     <div className="flow">
-      <p>
-        <Link href="/resume" className="text-link">
-          All versions
-        </Link>
-      </p>
+      <nav aria-label="Résumé versions">
+        <ul className="version-tabs">
+          {RESUME_TYPES.map((version) => (
+            <li key={version}>
+              <Link
+                href={`/resume/${version}`}
+                className="version-tab"
+                aria-current={version === type ? "page" : undefined}
+              >
+                {getVariantMeta(version).label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
       <h1 className="page-title">{meta.label} résumé</h1>
       {meta.summary && <p className="lede">{meta.summary}</p>}
       <div className="btn-row">
