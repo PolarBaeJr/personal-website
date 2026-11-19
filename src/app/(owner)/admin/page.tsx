@@ -15,7 +15,7 @@ const PLACES = [
     text: "Tagline, about text, status line, emails and links.",
   },
   { href: "/admin/home", title: "Home page", text: "Featured projects, experience and the T-account." },
-  { href: "/admin/about", title: "About page", text: "Clubs, competitions, hobbies and testimonials." },
+  { href: "/admin/about", title: "Other involvements page", text: "Clubs, competitions, hobbies and testimonials." },
   { href: "/admin/projects", title: "Projects", text: "Add, edit, reorder or hide projects." },
   { href: "/admin/posts", title: "Blog posts", text: "Write, edit and delete posts." },
   { href: "/admin/socials", title: "Links page", text: "The rows on /socials." },

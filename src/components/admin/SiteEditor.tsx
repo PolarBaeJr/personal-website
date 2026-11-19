@@ -115,7 +115,7 @@ export function SiteEditor({
       <ListEditor
         id="edit-about"
         title="About you"
-        hint="The paragraphs on the About page. The home page shows them as one paragraph."
+        hint="Shown on the home page as one paragraph."
         path="about"
         items={data.about}
         onChange={(about) => setData({ ...data, about })}

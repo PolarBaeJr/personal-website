@@ -5,7 +5,7 @@ import { loadSection } from "@/lib/admin/data";
 import { requireOwner } from "@/lib/owner";
 
 export const metadata: Metadata = {
-  title: "About page",
+  title: "Other involvements page",
 };
 
 export default async function AdminAboutPage() {
@@ -14,7 +14,7 @@ export default async function AdminAboutPage() {
   return (
     <>
       <AdminPageHead
-        title="About page"
+        title="Other involvements page"
         intro="Clubs, competitions, hobbies and testimonials. The about text itself is under About you and contact details."
         viewHref="/about"
         historyHref="/admin/about/history"

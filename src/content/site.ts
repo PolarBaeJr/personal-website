@@ -61,7 +61,7 @@ export const nav: NavEntry[] = [
   {
     label: "About me",
     items: [
-      { label: "About", href: "/about" },
+      { label: "Other involvements", href: "/about" },
       { label: "Blog", href: "/blog" },
       { label: "Contact", href: "/contact" },
       { label: "Socials", href: "/socials" },

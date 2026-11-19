@@ -67,7 +67,7 @@ export const FIELD_LABELS: Record<string, string> = {
 export const SECTION_LABELS: Record<string, string> = {
   site: "About you and contact details",
   home: "Home page",
-  about: "About page",
+  about: "Other involvements page",
   projects: "Projects",
   socials: "Links page",
 };

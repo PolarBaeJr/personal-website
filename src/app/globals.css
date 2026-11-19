@@ -14,6 +14,7 @@
     --cobalt: #2d4bd2;
     --teal: #0f8f7e;
     --on-cobalt: #fff;
+    --danger-ink: #c4314b;
 
     /* Type */
     --font-body: var(--font-instrument), system-ui, sans-serif;
@@ -42,8 +43,18 @@
     }
   }
 
+  /* Theme: follows the OS unless the toggle set data-theme on <html>.
+     The two dark token lists below must match. */
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme="light"]) {
       --bg: #0e1220;
       --surface: #151a2b;
       --ink: #e9ecf3;
@@ -52,9 +63,25 @@
       --cobalt: #7d93ff;
       --teal: #3cc7b1;
       --on-cobalt: #0e1220;
+      --danger-ink: #ff8a9b;
     }
   }
+
+  :root[data-theme="dark"] {
+    --bg: #0e1220;
+    --surface: #151a2b;
+    --ink: #e9ecf3;
+    --slate: #98a1b3;
+    --line: #262d42;
+    --cobalt: #7d93ff;
+    --teal: #3cc7b1;
+    --on-cobalt: #0e1220;
+    --danger-ink: #ff8a9b;
+  }
 }
+
+/* No dark: variants are used. If they ever are, add a @custom-variant that
+   follows data-theme, or they will ignore the toggle. */
 
 @theme inline {
   --color-bg: var(--bg);
@@ -178,9 +205,42 @@
     white-space: nowrap;
   }
 
+  .site-header-end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
   .site-nav {
     min-width: 0;
     max-width: 100%;
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: calc(var(--radius) - 4px);
+    background: transparent;
+    color: var(--slate);
+    cursor: pointer;
+    transition: color 150ms, background-color 150ms;
+  }
+
+  .theme-toggle:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--cobalt) 8%, transparent);
+  }
+
+  .theme-toggle svg {
+    width: 20px;
+    height: 20px;
   }
 
   .nav-list {
@@ -664,7 +724,9 @@
     gap: var(--space-6);
   }
 
-  @media (max-width: 640px) {
+  /* The header stacks a bit above the 640px layout breakpoint: with the
+     theme button, the one-row header needs about 670px. */
+  @media (max-width: 700px) {
     /* Sticky with a negative top: the brand row scrolls out of view and
        only the nav row below it stays pinned. */
     .site-header {
@@ -672,16 +734,34 @@
     }
 
     .site-header-inner {
-      flex-direction: column;
-      align-items: stretch;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "brand toggle"
+        "nav nav";
+      align-items: center;
       gap: 0;
       min-height: 0;
       padding-block: 0;
     }
 
+    .site-header-end {
+      display: contents;
+    }
+
     .site-brand {
-      align-self: flex-start;
+      grid-area: brand;
+      justify-self: start;
       height: var(--brand-row);
+    }
+
+    .site-header .theme-toggle {
+      grid-area: toggle;
+      height: var(--brand-row);
+    }
+
+    .site-nav {
+      grid-area: nav;
     }
 
     .nav-list {
@@ -693,7 +773,9 @@
       padding-inline: 0.25rem;
       font-size: 0.875rem;
     }
+  }
 
+  @media (max-width: 640px) {
     .row {
       grid-template-columns: 1fr;
     }
@@ -1594,6 +1676,20 @@
   .contact-subhead {
     margin-bottom: var(--space-3);
     font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  /* Clears the sticky header when the hero link jumps here. */
+  .home-contact {
+    scroll-margin-top: 5rem;
+  }
+
+  @media (max-width: 640px) {
+    .home-contact {
+      scroll-margin-top: 3.5rem;
+    }
   }
 
   .contact-info .contact-subhead {
@@ -1847,10 +1943,17 @@
 
   /* Links page (/socials) */
   .links-page {
+    position: relative;
     flex: 1;
     display: flex;
     justify-content: center;
     padding: var(--space-6) var(--gutter);
+  }
+
+  .links-theme {
+    position: absolute;
+    top: max(var(--space-2), env(safe-area-inset-top));
+    right: var(--gutter);
   }
 
   .links-column {
@@ -2493,15 +2596,9 @@
   }
 
   .admin-error {
-    color: #c4314b;
+    color: var(--danger-ink);
     font-size: 0.9375rem;
     font-weight: 500;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .admin-error {
-      color: #ff8a9b;
-    }
   }
 
   .admin-input {
@@ -2837,15 +2934,9 @@
     display: grid;
     gap: var(--space-1);
     padding-left: 1.25rem;
-    color: #c4314b;
+    color: var(--danger-ink);
     font-size: 0.875rem;
     list-style: disc;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .admin-issues {
-      color: #ff8a9b;
-    }
   }
 
   /* Tabs (post Write / Preview) */

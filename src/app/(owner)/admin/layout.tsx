@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { signOutAction } from "@/app/(owner)/actions";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { requireOwner } from "@/lib/owner";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             Your site
           </Link>
           <nav className="admin-header-nav" aria-label="Admin">
+            <ThemeToggle />
             <Link href="/" className="admin-header-link">
               View site
             </Link>

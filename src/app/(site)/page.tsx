@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { io } from "next/cache";
 import Link from "next/link";
 import { TestimonialsSection } from "@/components/AboutSections";
+import { ContactBlock } from "@/components/ContactBlock";
 import { EditLink } from "@/components/EditLink";
 import { ExperienceRows } from "@/components/ExperienceRows";
 import { ProjectList } from "@/components/ProjectList";
@@ -43,9 +44,9 @@ function Intro({ site, home }: { site: Site; home: HomeData }) {
         <Link href="/resume" className="btn btn--primary">
           View résumé
         </Link>
-        <Link href="/contact" className="btn btn--outline">
+        <a href="#contact" className="btn btn--outline">
           Get in touch
-        </Link>
+        </a>
       </div>
       <TAccount balance={home.balance} />
     </>
@@ -130,23 +131,6 @@ async function LiveFeaturedProjects() {
   );
 }
 
-async function GetInTouchButtons() {
-  await io();
-  const site = await getSite();
-  return (
-    <div className="btn-row">
-      <a href={`mailto:${site.email}`} className="btn btn--primary">
-        Email me
-      </a>
-      {site.links.map((link) => (
-        <a key={link.href} href={link.href} className="btn btn--outline">
-          {link.label}
-        </a>
-      ))}
-    </div>
-  );
-}
-
 export default function Home() {
   return (
     <div className="stack">
@@ -180,12 +164,9 @@ export default function Home() {
         <TestimonialsSection />
       </Suspense>
 
-      <section className="flow">
-        <h2>Get in touch</h2>
-        <p className="lede">Email is the fastest way to reach me.</p>
-        <Suspense fallback={<Skeleton lines={1} />}>
-          <GetInTouchButtons />
-        </Suspense>
+      <section id="contact" className="flow home-contact" aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Get in touch</h2>
+        <ContactBlock headingLevel={3} />
       </section>
     </div>
   );
