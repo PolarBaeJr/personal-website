@@ -109,7 +109,11 @@ else
 fi
 
 if [[ "${START}" == 1 ]]; then
+    # After a dashboard auto-update the site runs as goproxy-personal-page-N,
+    # which compose doesn't know about. Remove it first so only one copy runs
+    # against the SQLite volume; the dashboard picks the compose one up again.
     info "Starting the container"
+    ssh "${PI_HOST}" "ids=\$(docker ps -aq --filter label=proxy.service=personal-page --filter name=^goproxy-); [ -z \"\$ids\" ] || docker rm -f \$ids >/dev/null" || true
     ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose up -d --no-build" || die "start failed on the Pi"
 else
     exit 0

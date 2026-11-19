@@ -27,7 +27,9 @@ pick_host() {
     return 1
 }
 REMOTE_DIR="${REMOTE_DIR:-~/apps/personal-page}"
-CONTAINER="personal-page"
+# The dashboard's auto-update renames the container (goproxy-personal-page-N),
+# so find it by its proxy label instead of a fixed name.
+FIND='$(docker ps -aq --filter label=proxy.service=personal-page | head -n1)'
 
 PI_HOST="$(pick_host)" || { echo "cannot reach the Pi via pi, pi-lan or pi-remote" >&2; exit 1; }
 
@@ -36,11 +38,11 @@ cmd="${1:-shell}"
 
 case "${cmd}" in
     shell)   exec ssh -t "${PI_HOST}" "cd ${REMOTE_DIR} 2>/dev/null || cd ~; exec \$SHELL -l" ;;
-    logs)    exec ssh -t "${PI_HOST}" "docker logs -f --tail 100 ${CONTAINER}" ;;
-    status)  exec ssh "${PI_HOST}" "docker ps -a --filter name=^${CONTAINER}\$ --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'" ;;
-    restart) exec ssh "${PI_HOST}" "docker restart ${CONTAINER}" ;;
-    stop)    exec ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose down" ;;
-    exec)    exec ssh -t "${PI_HOST}" "docker exec -it ${CONTAINER} sh" ;;
+    logs)    exec ssh -t "${PI_HOST}" "docker logs -f --tail 100 ${FIND}" ;;
+    status)  exec ssh "${PI_HOST}" "docker ps -a --filter label=proxy.service=personal-page --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'" ;;
+    restart) exec ssh "${PI_HOST}" "docker restart ${FIND}" ;;
+    stop)    exec ssh "${PI_HOST}" "cd ${REMOTE_DIR}/docker && docker compose down; docker rm -f \$(docker ps -aq --filter label=proxy.service=personal-page) 2>/dev/null; true" ;;
+    exec)    exec ssh -t "${PI_HOST}" "docker exec -it ${FIND} sh" ;;
     run)     [[ $# -gt 0 ]] || { echo "usage: $0 run <command>" >&2; exit 64; }
              exec ssh -t "${PI_HOST}" "cd ${REMOTE_DIR} && $*" ;;
     -h|--help|help) sed -n '2,13p' "$0" ;;
