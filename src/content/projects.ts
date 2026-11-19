@@ -50,14 +50,14 @@ const allProjects: Project[] = [
     draft: true,
   },
   {
-    slug: "homelab-proxy-manager",
-    title: "Homelab proxy-manager",
+    slug: "proxy-manager",
+    title: "Proxy manager",
     summary:
-      "Self-hosted reverse proxy, load balancer and management dashboard, written in Go.",
+      "Reverse proxy, load balancer and management dashboard, written in Go.",
     description:
-      "Self-hosted reverse proxy, load balancer and management dashboard, written in Go. Runs my home server.",
+      "A reverse proxy and load balancer with a management dashboard, written in Go. It routes web traffic to services and is configured through container labels instead of hand-written config files.",
     category: "tech",
-    tags: ["Reverse proxy", "Go", "Self-hosted"],
+    tags: ["Reverse proxy", "Load balancer", "Go"],
     links: [
       { kind: "github", href: "https://github.com/PolarBaeJr/proxy-manager" },
     ],
@@ -68,11 +68,11 @@ const allProjects: Project[] = [
     slug: "personal-site",
     title: "Personal website",
     summary:
-      "This site: portfolio, résumé versions and link page, self-hosted on a Raspberry Pi.",
+      "Portfolio with tailored résumé versions, a link page and a journal entry trainer.",
     description:
-      "The site you're on: a portfolio, five tailored résumé versions with PDF downloads, a link page and a journal entry trainer. Built with Next.js, packaged with Docker, and deployed automatically from GitHub to a Raspberry Pi behind my homelab proxy-manager.",
+      "A portfolio with five tailored résumé versions and PDF downloads, a link page and a journal entry trainer. Built with Next.js and deployed automatically from GitHub.",
     category: "tech",
-    tags: ["Website", "Next.js", "Docker"],
+    tags: ["Website", "Next.js", "CI/CD"],
     links: [{ kind: "live", href: "https://matthewcheng.net" }],
     featured: false,
     draft: false,
@@ -81,11 +81,11 @@ const allProjects: Project[] = [
     slug: "market-tracker",
     title: "Market tracker",
     summary:
-      "FX and oil price tracker with a Discord bot, running on a Raspberry Pi.",
+      "FX and oil price tracker with a Discord bot.",
     description:
-      "Tracks the HKD to CAD exchange rate to help time currency conversions. Each morning it pulls Bank of Canada FX rates, oil prices and news headlines, refreshes a live Wise quote every 15 minutes, and stores the history in SQLite. A Discord bot posts alerts on new highs and lows, and a small web dashboard charts the data. Written in Python and run with Docker on a Raspberry Pi.",
+      "Tracks exchange rates and oil prices. Each morning it pulls Bank of Canada FX rates, oil prices and news headlines, refreshes a live conversion quote through the day, and stores the history in SQLite. A Discord bot posts alerts on new highs and lows, and a small web dashboard charts the data. Written in Python.",
     category: "tech",
-    tags: ["Price tracker", "Discord bot", "Raspberry Pi"],
+    tags: ["Price tracker", "Discord bot", "Python"],
     links: [
       { kind: "github", href: "https://github.com/PolarBaeJr/market-tracker" },
     ],

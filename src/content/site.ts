@@ -89,8 +89,8 @@ export const site: Site = {
       },
       { label: "Accounting dashboard", href: "/projects/accounting-dashboard" },
       {
-        label: "Homelab proxy-manager",
-        href: "/projects/homelab-proxy-manager",
+        label: "Proxy manager",
+        href: "/projects/proxy-manager",
       },
       { label: "Market tracker", href: "/projects/market-tracker" },
     ],
