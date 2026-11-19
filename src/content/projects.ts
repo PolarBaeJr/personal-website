@@ -32,10 +32,12 @@ export const projects: Project[] = [
   {
     slug: "accounting-dashboard",
     title: "Accounting dashboard",
-    summary: "Accounting dashboard project.",
-    description: "TODO: describe the project.",
+    summary:
+      "Inventory dashboard for a sample logistics company: stock levels, total value and low-stock alerts.",
+    description:
+      "A browser-based inventory command centre for a fictional company, ABC Logistics. Add items with quantity and unit price, and the dashboard totals inventory value, flags low-stock and out-of-stock items, merges duplicates, and lets you filter the list by category and status. Built with plain HTML, CSS and JavaScript.",
     category: "accounting",
-    tags: ["Dashboard", "Accounting"],
+    tags: ["Dashboard", "Inventory", "JavaScript"],
     links: [
       {
         kind: "github",
@@ -43,7 +45,7 @@ export const projects: Project[] = [
       },
     ],
     featured: true,
-    draft: false,
+    draft: true,
   },
   {
     slug: "homelab-proxy-manager",
@@ -66,7 +68,7 @@ export const projects: Project[] = [
     summary:
       "This site: portfolio, résumé versions and link page, self-hosted on a Raspberry Pi.",
     description:
-      "TODO: describe the project. Built with Next.js and deployed with Docker behind my homelab proxy-manager.",
+      "The site you're on: a portfolio, five tailored résumé versions with PDF downloads, a link page and a journal entry trainer. Built with Next.js, packaged with Docker, and deployed automatically from GitHub to a Raspberry Pi behind my homelab proxy-manager.",
     category: "tech",
     tags: ["Website", "Next.js", "Docker"],
     links: [{ kind: "live", href: "https://matthewcheng.net" }],
@@ -78,7 +80,8 @@ export const projects: Project[] = [
     title: "Market tracker",
     summary:
       "FX and oil price tracker with a Discord bot, running on a Raspberry Pi.",
-    description: "TODO: describe the project.",
+    description:
+      "Tracks the HKD to CAD exchange rate to help time currency conversions. Each morning it pulls Bank of Canada FX rates, oil prices and news headlines, refreshes a live Wise quote every 15 minutes, and stores the history in SQLite. A Discord bot posts alerts on new highs and lows, and a small web dashboard charts the data. Written in Python and run with Docker on a Raspberry Pi.",
     category: "tech",
     tags: ["Price tracker", "Discord bot", "Raspberry Pi"],
     links: [
@@ -91,7 +94,8 @@ export const projects: Project[] = [
     slug: "student-dashboard",
     title: "Student dashboard",
     summary: "Student management dashboard built with Next.js and Supabase.",
-    description: "TODO: describe the project.",
+    description:
+      "A student planner built around four daily questions: what to work on next, what's due soon, what's overdue, and how much work is left this week. Tracks courses, assignments, tasks, exams and study sessions, with a calendar view and per-user sign-in. Built with Next.js, Supabase and Tailwind CSS.",
     category: "tech",
     tags: ["Dashboard", "Next.js", "Supabase"],
     links: [
