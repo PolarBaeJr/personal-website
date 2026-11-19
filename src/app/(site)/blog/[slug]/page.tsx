@@ -1,10 +1,18 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { io } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPost, getPostSlugs } from "@/lib/posts";
+import { Skeleton } from "@/components/Skeleton";
+import { getPost } from "@/lib/content";
+import { seedPosts } from "@/lib/content-data";
+import { postList } from "@/lib/content-view";
+import type { Post } from "@/lib/posts";
 
+// The live posts are in the DB; slugs outside the seeds render on demand
+// (the proxy has already 404'd unknown ones).
 export function generateStaticParams() {
-  const params = getPostSlugs().map((slug) => ({ slug }));
+  const params = postList(seedPosts()).map(({ slug }) => ({ slug }));
   // Must return at least one entry with Cache Components; the placeholder 404s.
   return params.length > 0 ? params : [{ slug: "__none__" }];
 }
@@ -13,23 +21,15 @@ export async function generateMetadata({
   params,
 }: PageProps<"/blog/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  await io();
+  const post = await getPost(slug);
   if (!post) return {};
   return { title: post.title, description: post.summary };
 }
 
-export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
-  const { slug } = await params;
-  const post = getPost(slug);
-  if (!post) notFound();
-
+function PostBody({ post }: { post: Post }) {
   return (
-    <article className="flow">
-      <p>
-        <Link href="/blog" className="text-link">
-          All posts
-        </Link>
-      </p>
+    <>
       <h1 className="page-title">{post.title}</h1>
       <time dateTime={post.date} className="text-slate">
         {post.date}
@@ -38,6 +38,31 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
         className="prose"
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
+    </>
+  );
+}
+
+async function LivePostBody({ slug }: { slug: string }) {
+  await io();
+  const post = await getPost(slug);
+  // Backstop only: the proxy 404s unknown slugs before rendering starts.
+  if (!post) notFound();
+  return <PostBody post={post} />;
+}
+
+export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
+  const { slug } = await params;
+
+  return (
+    <article className="flow">
+      <p>
+        <Link href="/blog" className="text-link">
+          All posts
+        </Link>
+      </p>
+      <Suspense fallback={<Skeleton lines={8} />}>
+        <LivePostBody slug={slug} />
+      </Suspense>
     </article>
   );
 }

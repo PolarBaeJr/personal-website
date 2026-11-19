@@ -1,16 +1,20 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { io } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
-import { site } from "@/content/site";
+import { siteIdentity, type Site } from "@/content/site";
 import { CopyIconButton } from "@/components/CopyIconButton";
+import { Skeleton } from "@/components/Skeleton";
 import { SocialIcon } from "@/components/SocialIcon";
-import { socials, type Social } from "@/content/socials";
+import { getSite, getSocials } from "@/lib/content";
+import type { SocialRowView } from "@/lib/content-view";
 
 export const metadata: Metadata = {
-  title: { absolute: `${site.name} | Links` },
+  title: { absolute: `${siteIdentity.name} | Links` },
 };
 
-const initials = site.name
+const initials = siteIdentity.name
   .split(" ")
   .map((word) => word[0])
   .join("");
@@ -23,7 +27,7 @@ function SocialAnchor({
   children,
   label,
 }: {
-  social: Social;
+  social: SocialRowView;
   className: string;
   children: React.ReactNode;
   label?: string;
@@ -49,14 +53,20 @@ function SocialAnchor({
   );
 }
 
-export default function SocialsPage() {
+function LinksBody({
+  site,
+  socials,
+}: {
+  site: Site;
+  socials: SocialRowView[];
+}) {
   return (
-    <div className="links-column">
+    <>
       <div className="links-profile">
         {site.avatar ? (
           <Image
             src={site.avatar}
-            alt={site.name}
+            alt={siteIdentity.name}
             width={72}
             height={72}
             className="links-avatar"
@@ -66,7 +76,7 @@ export default function SocialsPage() {
             {initials}
           </div>
         )}
-        <h1 className="links-name">{site.name}</h1>
+        <h1 className="links-name">{siteIdentity.name}</h1>
         <p className="links-tagline">{site.tagline}</p>
         <p className="links-location">{site.location}</p>
         <ul className="links-quick">
@@ -107,6 +117,22 @@ export default function SocialsPage() {
           </li>
         ))}
       </ul>
+    </>
+  );
+}
+
+async function LiveLinksBody() {
+  await io();
+  const [site, socials] = await Promise.all([getSite(), getSocials()]);
+  return <LinksBody site={site} socials={socials} />;
+}
+
+export default function SocialsPage() {
+  return (
+    <div className="links-column">
+      <Suspense fallback={<Skeleton lines={9} minHeight="32rem" />}>
+        <LiveLinksBody />
+      </Suspense>
 
       <p className="links-footer">
         <Link href="/" className="links-footer-link">

@@ -1,14 +1,15 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { site } from "@/content/site";
+import type { Home } from "@/content/home";
+import { siteIdentity } from "@/content/site";
 
 // Stagger index read by the T-account animation-delay in globals.css.
 function delay(i: number) {
   return { "--i": i } as CSSProperties;
 }
 
-export function TAccount() {
-  const { accounting, building } = site.balance;
+export function TAccount({ balance }: { balance: Home["balance"] }) {
+  const { accounting, building } = balance;
 
   return (
     <div className="taccount">
@@ -42,7 +43,7 @@ export function TAccount() {
       <div className="taccount-vr" aria-hidden="true" />
       <p className="taccount-total">
         <span className="taccount-total-label">Balance</span>
-        <span className="taccount-total-value">= {site.name}</span>
+        <span className="taccount-total-value">= {siteIdentity.name}</span>
       </p>
     </div>
   );

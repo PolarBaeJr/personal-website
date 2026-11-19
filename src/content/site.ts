@@ -1,3 +1,5 @@
+import type { Site } from "@/lib/content-store/schema";
+
 export type NavItem = {
   label: string;
   href: string;
@@ -13,49 +15,21 @@ export type NavGroup = {
 
 export type NavEntry = NavItem | NavGroup;
 
-export type SiteLink = {
-  label: string;
-  href: string;
-};
+export type { Site, SiteEmail, SiteLink } from "@/lib/content-store/schema";
 
-export type SiteEmail = {
-  label: string;
-  address: string;
-};
-
-export type BalanceItem = {
-  label: string;
-  href?: string;
-};
-
-export type Site = {
-  name: string;
-  tagline: string;
-  // One sentence about what you're up to right now, shown under the tagline on the home page. Leave as "" to hide.
-  now?: string;
-  description: string;
-  about: string[];
-  // Short facts shown after the location under the home intro.
-  focus: string[];
-  email: string;
-  emails: SiteEmail[];
-  links: SiteLink[];
-  location: string;
-  footerLines: string[];
-  // Path to a photo in public/ (e.g. "/avatar.jpg"). Replaces the initials on /socials.
-  avatar?: string;
-  // The two sides of the home page T-account.
-  balance: {
-    accounting: string[];
-    building: BalanceItem[];
-  };
-};
-
-export const site: Site = {
+// Fixed in code: root metadata, the header, the /socials initials and the
+// T-account total read these at build time.
+export const siteIdentity = {
   name: "Matthew Cheng",
+  description: "Accounting student who also builds software.",
+};
+
+// Seed for the "site" section. The live copy is in the content DB; edit it
+// through the API (or MCP). Changes here reach the DB only through
+// reset_content_to_seed.
+export const siteSeed: Site = {
   tagline: "Accounting student who also builds software.",
   now: "",
-  description: "Accounting student who also builds software.",
   focus: ["Accounting", "CPA path", "Coding projects"],
   about: [
     "I'm a third-year student at SFU's Beedie School of Business, studying accounting and working toward my CPA.",
@@ -78,26 +52,6 @@ export const site: Site = {
     "Accounting student, SFU Beedie School of Business",
     "Burnaby, BC",
   ],
-  balance: {
-    accounting: [
-      "Intermediate Financial Accounting (BUS 320, 321)",
-      "Managerial Accounting (BUS 254)",
-      "Excel valuation model, CBV Institute challenge",
-      "Budget tracking and reconciliation, SFU Badminton Club",
-    ],
-    building: [
-      {
-        label: "SFU Badminton Club web app",
-        href: "/projects/badminton-club-app",
-      },
-      { label: "Accounting dashboard", href: "/projects/accounting-dashboard" },
-      {
-        label: "Proxy manager",
-        href: "/projects/proxy-manager",
-      },
-      { label: "Market tracker", href: "/projects/market-tracker" },
-    ],
-  },
 };
 
 // Header menu. A plain line is a link; a line with `items` is a dropdown.

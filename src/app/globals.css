@@ -124,6 +124,25 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Content-hole placeholder (Skeleton.tsx): empty bars, no content */
+  .skeleton {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+  }
+
+  .skeleton-line {
+    display: block;
+    height: 1em;
+    max-width: var(--measure);
+    border-radius: var(--radius);
+    background: var(--line);
+  }
+
+  .skeleton-line:last-child:not(:first-child) {
+    width: 60%;
+  }
+
   /* Page layout */
   .site-width {
     max-width: var(--container);

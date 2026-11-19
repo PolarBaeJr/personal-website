@@ -1,6 +1,7 @@
 import { io } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
+import type { Club, Hobby, Testimonial } from "@/content/about";
 import {
   clubDates,
   competitionDates,
@@ -106,8 +107,13 @@ export async function CertificationsSection() {
   );
 }
 
-export function ClubsSection() {
-  const clubs = getClubs();
+// Render inside <Suspense>, as above.
+export async function ClubsSection() {
+  await io();
+  return <ClubsView clubs={await getClubs()} />;
+}
+
+export function ClubsView({ clubs }: { clubs: Club[] }) {
   if (clubs.length === 0) return null;
 
   return (
@@ -139,8 +145,13 @@ export function ClubsSection() {
   );
 }
 
-export function HobbiesSection() {
-  const hobbies = getHobbies();
+// Render inside <Suspense>, as above.
+export async function HobbiesSection() {
+  await io();
+  return <HobbiesView hobbies={await getHobbies()} />;
+}
+
+export function HobbiesView({ hobbies }: { hobbies: Hobby[] }) {
   if (hobbies.length === 0) return null;
 
   return (
@@ -171,8 +182,17 @@ export function HobbiesSection() {
   );
 }
 
-export function TestimonialsSection() {
-  const testimonials = getTestimonials();
+// Render inside <Suspense>, as above.
+export async function TestimonialsSection() {
+  await io();
+  return <TestimonialsView testimonials={await getTestimonials()} />;
+}
+
+export function TestimonialsView({
+  testimonials,
+}: {
+  testimonials: Testimonial[];
+}) {
   if (testimonials.length === 0) return null;
 
   return (

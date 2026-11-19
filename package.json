@@ -14,12 +14,14 @@
     "journal:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-journal-scenarios.ts"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "gray-matter": "^4.0.3",
     "marked": "^18.2.1",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "zod": "^3.25"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",

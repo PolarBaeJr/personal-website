@@ -1,11 +1,6 @@
-export type SocialIconName =
-  | "globe"
-  | "document"
-  | "linkedin"
-  | "github"
-  | "mail"
-  | "shuttlecock"
-  | "folder";
+import type { SOCIAL_ICON_NAMES } from "@/lib/content-store/schema";
+
+export type SocialIconName = (typeof SOCIAL_ICON_NAMES)[number];
 
 // Brand marks (LinkedIn, GitHub) are the Simple Icons paths (CC0) and are
 // filled; the rest are drawn as 2px outlines on the same 24px grid.

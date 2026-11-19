@@ -11,7 +11,7 @@ import {
   type ResumeProject,
   type SectionKey,
 } from "@/content/resume";
-import { displayUrl, site } from "@/content/site";
+import { displayUrl, siteIdentity, type Site } from "@/content/site";
 import type { ResumeType } from "@/lib/resume-types";
 import {
   looksLikeDateRange,
@@ -76,7 +76,12 @@ function withMeta(project: Omit<ResumeProject, "href" | "competition">) {
   return { ...project, ...meta };
 }
 
-export function buildResume(type: ResumeType, parsed: ParsedTex) {
+// site supplies the header contacts; pass only what visitors may see.
+export function buildResume(
+  type: ResumeType,
+  parsed: ParsedTex,
+  site: Pick<Site, "emails" | "links">,
+) {
   const { lineOrder } = variantConfig[type];
   const highlights: ResumeHighlight[] = [];
   const education: ResumeEducation[] = [];
@@ -167,7 +172,7 @@ export function buildResume(type: ResumeType, parsed: ParsedTex) {
   return {
     type,
     header: {
-      name: parsed.name || site.name,
+      name: parsed.name || siteIdentity.name,
       location,
       contacts: [
         ...site.emails.map((e) => ({

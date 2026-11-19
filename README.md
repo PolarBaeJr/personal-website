@@ -14,18 +14,28 @@ npm run lint
 
 ## Where to edit
 
+Site content lives in a SQLite DB (`content.db`, next to the résumé DB; `CONTENT_DB` overrides the path) and is edited through the token-protected API (`/api/content/*`, `/api/posts/*`) or the MCP server in `mcp/`. Changes go live at once, without a rebuild, and every save is a version you can restore.
+
+The files under `src/content/` and `content/posts/` are now seeds: they fill the DB the first time it is created, and the site falls back to them when there is no DB (for example during `next build`). Editing a seed does not change the live site by itself; run `reset_content_to_seed` (or `POST /api/content/<section>/reset`) to apply it.
+
+| What | Section | Seed |
+| --- | --- | --- |
+| Tagline, about, emails, location, social links, footer lines, avatar | `site` | `src/content/site.ts` (`siteSeed`) |
+| Featured projects, home experience, home T-account | `home` | `src/content/home.ts` |
+| Competitions, clubs, hobbies, testimonials | `about` | `src/content/about.ts` |
+| Projects (drafts and hidden ones are not shown to visitors) | `projects` | `src/content/projects.ts` |
+| Link-in-bio page (`/socials`) | `socials` | `src/content/socials.ts` |
+| Blog posts | `post:<slug>` | `content/posts/*.md` (filename = URL slug) |
+
+Still in code:
+
 | What | Where |
 | --- | --- |
-| Name, tagline, about, emails, location, social links, footer lines | `src/content/site.ts` (`site`) |
-| Home page T-account (Accounting / Building sides) | `src/content/site.ts` (`site.balance`) |
+| Name and site description | `src/content/site.ts` (`siteIdentity`) |
 | Navigation | `src/content/site.ts` (`nav`): add a line plus its route folder in `src/app/(site)/` |
-| Projects | `src/content/projects.ts` (set `draft: false` when ready, `featured: true` to show on the home page) |
-| Résumé content | `src/content/resume.ts` (tag an entry with `types` to limit it to some versions) |
+| Résumé content | `resumes/<type>.tex`, edited through the résumé API |
 | Résumé versions (labels, audiences, section order) | `src/content/resume.ts` (`variantConfig`); the list of versions is in `src/lib/resume-types.ts` |
-| Résumé PDF | Placeholder at `/resume/<type>/document` (`src/app/(site)/resume/[type]/document/page.tsx`) |
-| Link-in-bio page (`/socials`) | `src/content/socials.ts`; set `site.avatar` to show a photo instead of initials |
-| Contact page | `src/app/(site)/contact/page.tsx` (reads `site.emails` and `site.links`) |
-| Blog posts | `content/posts/*.md` (filename = URL slug) |
+| Contact page reasons | `src/app/(site)/contact/page.tsx` |
 | Playground experiments | `src/app/(site)/playground/<name>/page.tsx` |
 | Colours, fonts, spacing, layout | Tokens at the top of `src/app/globals.css` |
 | Favicon | `src/app/favicon.ico` |
@@ -33,6 +43,8 @@ npm run lint
 Pages with the site header and footer live in `src/app/(site)/`; `/socials` lives in `src/app/(links)/` and has neither. The folder names in brackets don't appear in URLs.
 
 ## Blog post format
+
+Seed posts in `content/posts/` use frontmatter:
 
 ```md
 ---
@@ -44,7 +56,7 @@ summary: "One-line summary shown on the blog index."
 Markdown body…
 ```
 
-`title`, `date` and `summary` are required; the build fails with a message naming the file if any are missing. Quote the date. Posts are sorted newest first. The HTML is not sanitised, so only publish your own content.
+`title`, `date` and `summary` are required; a seed missing any is logged and skipped. Quote the date. Posts are sorted newest first. Raw HTML in the body is shown as text, not rendered.
 
 ## Notes for this Next.js version
 

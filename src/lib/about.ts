@@ -1,13 +1,6 @@
-import {
-  clubs,
-  competitions,
-  hobbies,
-  testimonials,
-  type Club,
-  type Competition,
-  type Hobby,
-  type Testimonial,
-} from "@/content/about";
+import { cacheLife, cacheTag } from "next/cache";
+import type { Club, Competition, Hobby, Testimonial } from "@/content/about";
+import { getAbout } from "@/lib/content";
 import { getResume } from "@/lib/resume";
 
 export type Certification = {
@@ -26,8 +19,13 @@ export function clubDates(start?: string, end?: string) {
   return `${start}–${end ?? "Present"}`;
 }
 
+// Reads the résumé and the about section, so it is tagged with both.
 export async function getCompetitions(): Promise<Competition[]> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("resume", "resume:general", "content", "content:about");
   const { projects } = await getResume("general");
+  const { competitions } = await getAbout();
   const fromResume = projects
     .filter((project) => project.competition)
     .map((project) => ({
@@ -53,14 +51,14 @@ export async function getCertifications(): Promise<Certification[]> {
     });
 }
 
-export function getClubs(): Club[] {
-  return clubs;
+export async function getClubs(): Promise<Club[]> {
+  return (await getAbout()).clubs;
 }
 
-export function getHobbies(): Hobby[] {
-  return hobbies;
+export async function getHobbies(): Promise<Hobby[]> {
+  return (await getAbout()).hobbies;
 }
 
-export function getTestimonials(): Testimonial[] {
-  return testimonials;
+export async function getTestimonials(): Promise<Testimonial[]> {
+  return (await getAbout()).testimonials;
 }

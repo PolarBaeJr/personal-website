@@ -1,12 +1,21 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { io } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RepoCard } from "@/components/RepoCard";
-import { getProject, projects } from "@/content/projects";
+import { Skeleton } from "@/components/Skeleton";
+import { projectsSeed, type Project } from "@/content/projects";
+import { getProject } from "@/lib/content";
+import { visibleProjects } from "@/lib/content-view";
 import { parseGitHubRepo } from "@/lib/github";
 
+const seedProjects = visibleProjects(projectsSeed);
+
+// The live list is in the DB; any slug outside the seed renders on demand
+// (the proxy has already 404'd unknown ones).
 export function generateStaticParams() {
-  const params = projects.map((project) => ({ slug: project.slug }));
+  const params = seedProjects.map((project) => ({ slug: project.slug }));
   // Must return at least one entry with Cache Components; the placeholder 404s.
   return params.length > 0 ? params : [{ slug: "__none__" }];
 }
@@ -15,18 +24,13 @@ export async function generateMetadata({
   params,
 }: PageProps<"/projects/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  await io();
+  const project = await getProject(slug);
   if (!project) return {};
   return { title: project.title, description: project.summary };
 }
 
-export default async function ProjectPage({
-  params,
-}: PageProps<"/projects/[slug]">) {
-  const { slug } = await params;
-  const project = getProject(slug);
-  if (!project) notFound();
-
+function ProjectBody({ project }: { project: Project }) {
   const githubLink = project.links.find((link) => link.kind === "github");
   const repo = githubLink ? parseGitHubRepo(githubLink.href) : null;
   const buttonLinks = repo
@@ -34,12 +38,7 @@ export default async function ProjectPage({
     : project.links;
 
   return (
-    <article className="flow">
-      <p>
-        <Link href="/projects" className="text-link">
-          All projects
-        </Link>
-      </p>
+    <>
       <h1 className="page-title">
         {project.title}
         {project.draft && <span className="badge-draft">Draft</span>}
@@ -81,6 +80,33 @@ export default async function ProjectPage({
           summary={project.summary}
         />
       )}
+    </>
+  );
+}
+
+async function LiveProjectBody({ slug }: { slug: string }) {
+  await io();
+  const project = await getProject(slug);
+  // Backstop only: the proxy 404s unknown slugs before rendering starts.
+  if (!project) notFound();
+  return <ProjectBody project={project} />;
+}
+
+export default async function ProjectPage({
+  params,
+}: PageProps<"/projects/[slug]">) {
+  const { slug } = await params;
+
+  return (
+    <article className="flow">
+      <p>
+        <Link href="/projects" className="text-link">
+          All projects
+        </Link>
+      </p>
+      <Suspense fallback={<Skeleton lines={5} />}>
+        <LiveProjectBody slug={slug} />
+      </Suspense>
     </article>
   );
 }

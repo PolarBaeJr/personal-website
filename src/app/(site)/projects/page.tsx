@@ -1,16 +1,26 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { io } from "next/cache";
 import { ProjectList } from "@/components/ProjectList";
-import { projects } from "@/content/projects";
+import { Skeleton } from "@/components/Skeleton";
+import { getProjects } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Projects",
 };
 
+async function LiveProjectList() {
+  await io();
+  return <ProjectList projects={await getProjects()} headingLevel="h2" />;
+}
+
 export default function ProjectsPage() {
   return (
     <div className="flow">
       <h1 className="page-title">Projects</h1>
-      <ProjectList projects={projects} headingLevel="h2" />
+      <Suspense fallback={<Skeleton lines={8} />}>
+        <LiveProjectList />
+      </Suspense>
     </div>
   );
 }

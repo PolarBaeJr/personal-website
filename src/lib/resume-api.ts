@@ -143,15 +143,27 @@ export function containsPrivateDetails(tex: string): boolean {
   return false;
 }
 
-export function privateDetailsError(): Response {
-  return json(
-    { error: "tex must use \\resumephone and \\resumeaddress, not the literal values" },
-    400,
-  );
-}
-
 export function revalidateResume(type: ResumeType): void {
   revalidateTag(`resume:${type}`, { expire: 0 });
+}
+
+// A version number from a JSON body; optional only when allowMissing.
+export function readVersionField(value: unknown, field: string): number | Response;
+export function readVersionField(
+  value: unknown,
+  field: string,
+  allowMissing: true,
+): number | undefined | Response;
+export function readVersionField(
+  value: unknown,
+  field: string,
+  allowMissing = false,
+): number | undefined | Response {
+  if (value === undefined && allowMissing) return undefined;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
+    return json({ error: `${field} must be a positive integer` }, 400);
+  }
+  return value;
 }
 
 export function parseVersionParam(v: string): number | "current" | null {

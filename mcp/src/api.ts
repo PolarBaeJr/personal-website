@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { ApiError } from "../../src/lib/mcp/tools.ts";
 
-// HTTP client for the site's résumé API. The token comes from the env, or
+// HTTP client for the site's API. The token comes from the env, or
 // else from the repo's .env.local / .env (gitignored), and is never included
 // in any message.
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
@@ -28,8 +29,6 @@ function setting(key: string): string | undefined {
 }
 
 const BASE = (setting("RESUME_API_URL") || "https://matthewcheng.net").replace(/\/$/, "");
-
-export class ApiError extends Error {}
 
 export async function call(
   path: string,

@@ -1,7 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
+import { io } from "next/cache";
 import { ContactNote } from "@/components/ContactNote";
 import { CopyButton } from "@/components/CopyButton";
-import { displayUrl, site } from "@/content/site";
+import { Skeleton } from "@/components/Skeleton";
+import { displayUrl, type Site } from "@/content/site";
+import { getSite } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -13,6 +17,48 @@ const reasons = [
   "You want to nerd out about accounting, the CPA path or a coding project",
   "You're up for a coffee chat",
 ];
+
+function ContactRows({ site }: { site: Site }) {
+  return (
+    <dl className="contact-rows">
+      {site.emails.map((email) => (
+        <div key={email.address} className="contact-row">
+          <dt>{email.label}</dt>
+          <dd className="contact-value">
+            <a href={`mailto:${email.address}`} className="text-link">
+              {email.address}
+            </a>
+            <CopyButton text={email.address} />
+          </dd>
+        </div>
+      ))}
+      {site.links.map((link) => (
+        <div key={link.href} className="contact-row">
+          <dt>{link.label}</dt>
+          <dd>
+            <a href={link.href} className="text-link">
+              {displayUrl(link.href)}
+            </a>
+          </dd>
+        </div>
+      ))}
+      <div className="contact-row">
+        <dt>Location</dt>
+        <dd>{site.location}</dd>
+      </div>
+    </dl>
+  );
+}
+
+async function LiveContactRows() {
+  await io();
+  return <ContactRows site={await getSite()} />;
+}
+
+async function LiveContactNote() {
+  await io();
+  return <ContactNote to={(await getSite()).email} />;
+}
 
 export default function ContactPage() {
   return (
@@ -39,40 +85,18 @@ export default function ContactPage() {
             ))}
           </ul>
 
-          <dl className="contact-rows">
-            {site.emails.map((email) => (
-              <div key={email.address} className="contact-row">
-                <dt>{email.label}</dt>
-                <dd className="contact-value">
-                  <a href={`mailto:${email.address}`} className="text-link">
-                    {email.address}
-                  </a>
-                  <CopyButton text={email.address} />
-                </dd>
-              </div>
-            ))}
-            {site.links.map((link) => (
-              <div key={link.href} className="contact-row">
-                <dt>{link.label}</dt>
-                <dd>
-                  <a href={link.href} className="text-link">
-                    {displayUrl(link.href)}
-                  </a>
-                </dd>
-              </div>
-            ))}
-            <div className="contact-row">
-              <dt>Location</dt>
-              <dd>{site.location}</dd>
-            </div>
-          </dl>
+          <Suspense fallback={<Skeleton lines={5} />}>
+            <LiveContactRows />
+          </Suspense>
         </div>
 
         <section aria-labelledby="note-heading">
           <h2 id="note-heading" className="contact-subhead">
             Write me a note
           </h2>
-          <ContactNote to={site.email} />
+          <Suspense fallback={<Skeleton lines={6} minHeight="16rem" />}>
+            <LiveContactNote />
+          </Suspense>
         </section>
       </div>
     </div>

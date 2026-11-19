@@ -310,6 +310,18 @@ export function fillMissingPdfs(
   ).run(pub, priv, id);
 }
 
+// Regenerate: swaps in freshly compiled PDFs for an existing tex version.
+export function replacePdfs(
+  db: DatabaseSync,
+  id: number,
+  pub: Uint8Array,
+  priv: Uint8Array | null,
+): void {
+  db.prepare(
+    `UPDATE versions SET pdf_public = ?, pdf_private = ? WHERE id = ? AND source = 'tex'`,
+  ).run(pub, priv, id);
+}
+
 export function importPdfsForFilename(
   db: DatabaseSync,
   filename: string,

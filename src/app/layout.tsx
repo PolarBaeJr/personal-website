@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
-import { site } from "@/content/site";
+import { siteIdentity } from "@/content/site";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -11,10 +11,10 @@ const instrumentSans = Instrument_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: site.name,
-    template: `%s | ${site.name}`,
+    default: siteIdentity.name,
+    template: `%s | ${siteIdentity.name}`,
   },
-  description: site.description,
+  description: siteIdentity.description,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
