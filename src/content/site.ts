@@ -21,6 +21,8 @@ export type BalanceItem = {
 export type Site = {
   name: string;
   tagline: string;
+  // One sentence about what you're up to right now, shown under the tagline on the home page. Leave as "" to hide.
+  now?: string;
   description: string;
   about: string[];
   email: string;
@@ -40,6 +42,7 @@ export type Site = {
 export const site: Site = {
   name: "Matthew Cheng",
   tagline: "Accounting student who also builds software.",
+  now: "",
   description: "Accounting student who also builds software.",
   about: ["TODO: write a short paragraph about yourself."],
   email: "matthewcheng833@gmail.com",
@@ -84,6 +87,7 @@ export const site: Site = {
 // Add a section = add one line here (and its route folder).
 export const nav: NavItem[] = [
   { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
   { label: "Résumé", href: "/resume" },
   { label: "Projects", href: "/projects" },
   { label: "Blog", href: "/blog" },

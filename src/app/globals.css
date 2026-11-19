@@ -848,6 +848,90 @@
     align-items: center;
   }
 
+  /* About */
+  .now-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-2);
+    max-width: var(--measure);
+  }
+
+  .now-label {
+    color: var(--teal);
+    font-weight: 600;
+  }
+
+  .ledger-total {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    border-top: 3px double var(--ink);
+    margin-top: -1px;
+    padding-top: var(--space-2);
+    color: var(--slate);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--space-4);
+  }
+
+  .hobby-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--cobalt);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .hobby-card-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--line);
+  }
+
+  .hobby-card-image {
+    object-fit: cover;
+  }
+
+  .hobby-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .hobby-card-blurb {
+    color: var(--slate);
+  }
+
+  .quote-list {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .quote {
+    max-width: var(--measure);
+    border-left: 2px solid var(--teal);
+    padding-left: var(--space-4);
+  }
+
+  .quote-text {
+    font-size: 1.125rem;
+    line-height: 1.55;
+  }
+
+  .quote-cite {
+    margin-top: var(--space-2);
+    color: var(--slate);
+    font-size: 0.875rem;
+  }
+
   /* Links page (/socials) */
   .links-page {
     flex: 1;

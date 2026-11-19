@@ -43,6 +43,8 @@ export type ResumeProject = Tagged & {
   start?: string;
   end?: string;
   bullets: string[];
+  // true = also list under Case competitions & awards on /about
+  competition?: boolean;
 };
 
 export type LineKind = "accounting" | "technical" | "certifications" | "other";
@@ -215,6 +217,7 @@ export const resumeProjects: ResumeProject[] = [
     title: "CBV Institute Business Valuation Challenge",
     subtitle: "Team Member",
     start: "Nov 2026",
+    competition: true,
     bullets: [
       "Built the team's Excel valuation model, normalizing 3 years of EBITDA (removing excess owner pay and personal costs) and setting maintainable EBITDA of $21.7M with a through-the-cycle weighting.",
       "Selected a 5.0x–6.0x EV/EBITDA multiple, below the precedent median for declining margins and customer concentration, valuing the 85% stake at about $65M.",
@@ -225,6 +228,9 @@ export const resumeProjects: ResumeProject[] = [
 
 // Accounting and technical skill lines go here too, e.g.
 // { label: "Accounting", kind: "accounting", text: "Excel, Reconciliations" }
+// Certification lines are written as `Issuer, Certificate name (Mon YYYY)`;
+// /about splits them into issuer/name/date. Give each line a unique label or
+// keep split: false.
 export const skills: ResumeLine[] = [
   {
     label: "Certification",

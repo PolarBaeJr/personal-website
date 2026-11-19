@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TestimonialsSection } from "@/components/AboutSections";
 import { ExperienceRows } from "@/components/ExperienceRows";
 import { ProjectList } from "@/components/ProjectList";
 import { TAccount } from "@/components/TAccount";
@@ -17,12 +18,19 @@ export default function Home() {
   // T-account item count, set on the section so the .home-experience
   // animation-delay in CSS can wait until the T-account has finished.
   const taItems = site.balance.accounting.length + site.balance.building.length;
+  const now = site.now?.trim();
 
   return (
     <div className="stack">
       <section className="flow">
         <h1 className="display">{site.name}</h1>
         <p className="lede">{site.tagline}</p>
+        {now ? (
+          <p className="now-line">
+            <span className="now-label">Now</span>
+            <span>{now}</span>
+          </p>
+        ) : null}
         <p className="text-slate">{site.location}</p>
         <div className="btn-row">
           <Link href="/resume" className="btn btn--primary">
@@ -58,8 +66,15 @@ export default function Home() {
         <ProjectList projects={getFeaturedProjects()} />
       </section>
 
+      <TestimonialsSection />
+
       <section className="flow">
-        <h2>About</h2>
+        <div className="section-head">
+          <h2>About</h2>
+          <Link href="/about" className="text-link">
+            More about me
+          </Link>
+        </div>
         {site.about.map((paragraph) => (
           <p key={paragraph} className="measure">
             {paragraph}

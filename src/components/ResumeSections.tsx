@@ -121,7 +121,7 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
           <ul className="taccount-col taccount-col--accounting">
             {accounting.length > 0 ? (
               accounting.map((line) => (
-                <li key={line.label} className="taccount-skill">
+                <li key={`${line.label}-${line.text}`} className="taccount-skill">
                   <span className="skill-label">{line.label}</span>
                   <span className="pill-list">
                     {skillItems(line).map((item) => (
@@ -139,7 +139,7 @@ function SectionBody({ section, resume }: { section: SectionKey; resume: Resume 
           <ul className="taccount-col taccount-col--building">
             {building.length > 0 ? (
               building.map((line) => (
-                <li key={line.label} className="taccount-skill">
+                <li key={`${line.label}-${line.text}`} className="taccount-skill">
                   <span className="skill-label">{line.label}</span>
                   <span className="pill-list">
                     {skillItems(line).map((item) => (
