@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { ContactLinks } from "@/components/ContactLinks";
 import { projects } from "@/content/projects";
-import { nav, site } from "@/content/site";
-
-const pages = [...nav, { label: "Socials", href: "/socials" }];
+import { navPages, site } from "@/content/site";
 
 export function SiteFooter() {
   return (
@@ -22,7 +20,7 @@ export function SiteFooter() {
         <nav className="footer-group" aria-label="Footer">
           <h2 className="footer-heading">Pages</h2>
           <ul className="footer-list">
-            {pages.map((item) => (
+            {navPages.map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="footer-link">
                   {item.label}

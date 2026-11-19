@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { site } from "@/content/site";
+import { SiteHeader } from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Not found",
 };
 
 // Renders inside the root layout only, so it brings its own header and main.
+// The proxy rewrite makes the client pathname differ from the rendered one,
+// so active nav state is turned off here.
 export default function NotFound() {
   return (
     <>
-      <header className="bare-header site-width">
-        <Link href="/" className="site-brand">
-          {site.name}
-        </Link>
-      </header>
+      <SiteHeader showActive={false} />
       <main className="site-main site-width flow">
         <h1 className="page-title">Not found</h1>
         <p className="lede">Debits ≠ Credits. This page doesn&apos;t exist.</p>

@@ -3,6 +3,13 @@ export type NavItem = {
   href: string;
 };
 
+export type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
+export type NavEntry = NavItem | NavGroup;
+
 export type SiteLink = {
   label: string;
   href: string;
@@ -84,16 +91,31 @@ export const site: Site = {
   },
 };
 
-// Add a section = add one line here (and its route folder).
-export const nav: NavItem[] = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Résumé", href: "/resume" },
+// Header menu. A plain line is a link; a line with `items` is a dropdown.
+// The footer lists every page from here automatically.
+// Add a page = add one line (and its route folder).
+export const nav: NavEntry[] = [
+  {
+    label: "About me",
+    items: [
+      { label: "About", href: "/about" },
+      { label: "Blog", href: "/blog" },
+      { label: "Contact", href: "/contact" },
+      { label: "Socials", href: "/socials" },
+    ],
+  },
   { label: "Projects", href: "/projects" },
-  { label: "Blog", href: "/blog" },
+  { label: "Résumé", href: "/resume" },
   { label: "Playground", href: "/playground" },
-  { label: "Contact", href: "/contact" },
 ];
+
+export function isNavGroup(entry: NavEntry): entry is NavGroup {
+  return "items" in entry;
+}
+
+export const navPages: NavItem[] = nav.flatMap((entry) =>
+  isNavGroup(entry) ? entry.items : [entry],
+);
 
 // "https://github.com/PolarBaeJr" -> "github.com/PolarBaeJr"
 export function displayUrl(href: string): string {
