@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 const reasons = [
-  "You're hiring for an accounting, audit or finance role",
-  "You need a teammate for a case competition",
-  "You want to talk about the CPA path or Beedie",
-  "You want to nerd out about a coding project",
+  "You need a teammate for a case competition or hackathon",
+  "You're building something fun and want another pair of hands",
+  "You want to nerd out about accounting, the CPA path or a coding project",
+  "You're up for a coffee chat",
 ];
 
 export default function ContactPage() {

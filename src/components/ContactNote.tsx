@@ -79,7 +79,7 @@ export function ContactNote({ to }: { to: string }) {
           name="message"
           rows={6}
           required
-          placeholder="A role, a case competition, or a project you want to talk about"
+          placeholder="A case comp, a hackathon idea, or a good coffee spot"
           value={message}
           onChange={(event) => setMessage(event.target.value)}
         />
