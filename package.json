@@ -10,7 +10,8 @@
     "resume:seed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/seed-resume.ts",
     "resume:import": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/import-resume-pdfs.ts",
     "resume:pull": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts pull",
-    "resume:push": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts push"
+    "resume:push": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/resume-sync.ts push",
+    "journal:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-journal-scenarios.ts"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

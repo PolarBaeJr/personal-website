@@ -985,6 +985,577 @@
     }
   }
 
+  /* Journal entry trainer */
+  .jt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .jt-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--space-3);
+  }
+
+  .jt-filter {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .jt-filter-legend {
+    color: var(--slate);
+    font-size: 0.875rem;
+    margin-bottom: var(--space-1);
+  }
+
+  .jt-filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .jt-choice {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding-inline: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .jt-choice-input,
+  .jt-side-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .jt-choice:has(:checked) {
+    border-color: var(--cobalt);
+    color: var(--cobalt);
+    background: color-mix(in srgb, var(--cobalt) 10%, transparent);
+  }
+
+  .jt-choice:has(:focus-visible),
+  .jt-side-option:has(:focus-visible) {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 3px;
+  }
+
+  .jt-score {
+    color: var(--slate);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .jt-context {
+    color: var(--slate);
+    font-size: 0.9375rem;
+    max-width: var(--measure);
+  }
+
+  .jt-card {
+    padding: var(--space-3);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--cobalt);
+    border-radius: var(--radius);
+  }
+
+  .jt-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--slate);
+    font-size: 0.875rem;
+  }
+
+  .jt-card-prompt {
+    margin-top: var(--space-2);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .jt-card-topic {
+    margin-top: var(--space-2);
+    color: var(--teal);
+    font-weight: 600;
+  }
+
+  .jt-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .jt-fieldset {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .jt-fieldset:disabled .jt-line {
+    opacity: 0.7;
+  }
+
+  .jt-lines {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-self: stretch;
+    list-style: none;
+    padding: 0;
+  }
+
+  .jt-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--cobalt);
+    border-radius: var(--radius);
+    min-width: 0;
+  }
+
+  .jt-line--credit {
+    border-left-color: var(--teal);
+  }
+
+  .jt-line-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .jt-line-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .jt-remove {
+    min-height: 44px;
+    min-width: 44px;
+    padding-inline: var(--space-2);
+    border: 0;
+    border-radius: var(--radius);
+    background: none;
+    color: var(--slate);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .jt-remove:hover {
+    color: var(--ink);
+  }
+
+  .jt-remove:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .jt-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .jt-field-label {
+    color: var(--slate);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .jt-select,
+  .jt-input {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: var(--space-2);
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 1rem;
+  }
+
+  .jt-select[aria-invalid="true"],
+  .jt-input[aria-invalid="true"] {
+    border-color: var(--ink);
+    border-width: 2px;
+  }
+
+  .jt-field-error {
+    color: var(--ink);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .jt-side-amount {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-2);
+    align-items: end;
+    min-width: 0;
+  }
+
+  .jt-side {
+    display: inline-flex;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .jt-side-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 4.5rem;
+    padding-inline: var(--space-2);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .jt-side-option:first-of-type {
+    border-radius: calc(var(--radius) - 4px) 0 0 calc(var(--radius) - 4px);
+  }
+
+  .jt-side-option + .jt-side-option {
+    margin-left: -1px;
+    border-radius: 0 calc(var(--radius) - 4px) calc(var(--radius) - 4px) 0;
+  }
+
+  .jt-side-option--debit:has(:checked) {
+    z-index: 1;
+    border-color: var(--cobalt);
+    background: var(--cobalt);
+    color: var(--on-cobalt);
+  }
+
+  .jt-side-option--credit:has(:checked) {
+    z-index: 1;
+    border-color: var(--teal);
+    background: color-mix(in srgb, var(--teal) 18%, var(--surface));
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .jt-amount {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--surface);
+  }
+
+  .jt-amount:focus-within {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 2px;
+  }
+
+  .jt-amount:has([aria-invalid="true"]) {
+    border-color: var(--ink);
+    border-width: 2px;
+  }
+
+  .jt-amount-prefix {
+    padding-left: var(--space-2);
+    color: var(--slate);
+  }
+
+  .jt-amount .jt-input,
+  .jt-amount .jt-input[aria-invalid="true"] {
+    border: 0;
+    background: transparent;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .jt-amount .jt-input:focus-visible {
+    outline: none;
+  }
+
+  .jt-btn {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  .jt-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .jt-totals {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-1) var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 2px solid var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .jt-totals-cell {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .jt-totals-cell--debit .jt-totals-value {
+    color: var(--cobalt);
+  }
+
+  .jt-totals-cell--credit {
+    text-align: right;
+  }
+
+  .jt-totals-cell--credit .jt-totals-value {
+    color: var(--teal);
+  }
+
+  .jt-totals-label {
+    color: var(--slate);
+    font-size: 0.875rem;
+  }
+
+  .jt-totals-value {
+    font-weight: 600;
+  }
+
+  .jt-totals-status {
+    grid-column: 1 / -1;
+    color: var(--slate);
+  }
+
+  .jt-totals--balanced .jt-totals-status {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .jt-totals--balanced::after {
+    content: "";
+    grid-column: 1 / -1;
+    height: 0;
+    border-top: 3px double var(--ink);
+    transform-origin: left;
+    animation: jt-rule 400ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  @keyframes jt-rule {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  .jt-actions {
+    margin-top: var(--space-1);
+  }
+
+  .jt-result {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .jt-result-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .jt-result-title--correct {
+    color: var(--teal);
+  }
+
+  .jt-feedback {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    max-width: var(--measure);
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+
+  .jt-solution {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .jt-journal {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .jt-journal th,
+  .jt-journal td {
+    padding-block: var(--space-2);
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .jt-journal th {
+    color: var(--slate);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .jt-journal .jt-journal-amount {
+    width: 6.5rem;
+    text-align: right;
+  }
+
+  .jt-journal tbody tr:last-child td {
+    border-bottom: 3px double var(--ink);
+  }
+
+  .jt-journal-row--credit .jt-journal-account {
+    padding-left: var(--space-4);
+  }
+
+  .jt-journal-debit {
+    color: var(--cobalt);
+  }
+
+  .jt-journal-credit {
+    color: var(--teal);
+  }
+
+  .jt-ledger {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+    list-style: none;
+    padding: 0;
+  }
+
+  .jt-t {
+    min-width: 0;
+  }
+
+  .jt-t-name {
+    padding-bottom: var(--space-1);
+    font-weight: 600;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .jt-t-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 2px solid var(--ink);
+  }
+
+  .jt-t-side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-height: 2.5rem;
+    min-width: 0;
+    padding: var(--space-2);
+    list-style: none;
+  }
+
+  .jt-t-side--debit {
+    border-right: 2px solid var(--ink);
+    color: var(--cobalt);
+    text-align: left;
+  }
+
+  .jt-t-side--credit {
+    color: var(--teal);
+    text-align: right;
+  }
+
+  .jt-t-entry {
+    animation: jt-post 350ms 200ms both;
+  }
+
+  @keyframes jt-post {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
+  .jt-explanation {
+    max-width: var(--measure);
+  }
+
+  @media (min-width: 640px) {
+    .jt-card {
+      padding: var(--space-4);
+    }
+
+    .jt-line {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      column-gap: var(--space-3);
+    }
+
+    .jt-line-head,
+    .jt-line > .jt-field-error {
+      grid-column: 1 / -1;
+    }
+
+    .jt-side-amount {
+      grid-template-columns: auto 9rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jt-totals--balanced::after,
+    .jt-t-entry {
+      animation: none;
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   /* Contact */
   .contact-value {
     align-items: center;
