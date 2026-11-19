@@ -8,11 +8,13 @@ export type Project = {
   links: { kind: "live" | "github"; href: string }[];
   featured: boolean;
   draft: boolean;
+  // Hidden projects are left out everywhere (lists, footer, their own page).
+  hidden?: boolean;
 };
 
 // Drafts are still listed, with a Draft badge. Set draft: false once filled in.
 // Link kinds: "live" shows as "Visit site" / "Live", "github" as "View on GitHub" / "GitHub".
-export const projects: Project[] = [
+const allProjects: Project[] = [
   {
     slug: "badminton-club-app",
     title: "SFU Badminton Club web app",
@@ -106,8 +108,11 @@ export const projects: Project[] = [
     ],
     featured: false,
     draft: false,
+    hidden: true,
   },
 ];
+
+export const projects = allProjects.filter((project) => !project.hidden);
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);

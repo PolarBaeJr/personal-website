@@ -28,15 +28,6 @@ export function ProjectList({ projects, headingLevel = "h3" }: Props) {
               {project.draft && <span className="badge-draft">Draft</span>}
             </Heading>
             <div className="row-aside">
-              {project.tags.length > 0 && (
-                <ul className="tag-list" aria-label="Tags">
-                  {project.tags.map((tag) => (
-                    <li key={tag} className="tag">
-                      {tag}
-                    </li>
-                  ))}
-                </ul>
-              )}
               {project.links.map((link) => (
                 <a
                   key={link.href}
@@ -50,6 +41,9 @@ export function ProjectList({ projects, headingLevel = "h3" }: Props) {
               ))}
             </div>
             <p className="row-summary">{project.summary}</p>
+            {project.tags.length > 0 && (
+              <p className="row-tags">{project.tags.join(", ")}</p>
+            )}
           </li>
         );
       })}
