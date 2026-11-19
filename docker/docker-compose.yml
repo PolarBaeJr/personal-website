@@ -41,8 +41,17 @@ services:
       TZ: ${TZ:-America/Vancouver}
       RESUME_DB: /data/resume.db
 
+    # The dashboard's auto-update copies HostConfig.Mounts when it recreates
+    # the container, but not HostConfig.Binds. Compose writes a plain named
+    # volume as a Bind; giving it an option (nocopy) makes it a Mount, so the
+    # volume survives auto-updates. nocopy only affects a brand-new empty
+    # volume, which then needs `chown 1000 /data` (the entrypoint says so).
     volumes:
-      - personal-page-data:/data
+      - type: volume
+        source: personal-page-data
+        target: /data
+        volume:
+          nocopy: true
 
     labels:
       proxy.enable:     "true"
