@@ -54,7 +54,10 @@ export const site: Site = {
   tagline: "Accounting student who also builds software.",
   now: "",
   description: "Accounting student who also builds software.",
-  about: ["TODO: write a short paragraph about yourself."],
+  about: [
+    "I'm a third-year student at SFU's Beedie School of Business, studying accounting and working toward my CPA.",
+    "Outside of class I build coding projects, and I like understanding how the code behind them works.",
+  ],
   email: "matthewcheng833@gmail.com",
   emails: [
     { label: "Email", address: "matthewcheng833@gmail.com" },

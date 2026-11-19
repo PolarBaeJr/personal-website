@@ -1691,7 +1691,9 @@
     flex-direction: column;
     gap: var(--space-5);
     width: 100%;
-    max-width: 28rem;
+    /* Grows with the screen: full width on phones, up to 40rem on desktop. */
+    max-width: clamp(28rem, 55vw, 40rem);
+    font-size: clamp(1rem, 0.9rem + 0.35vw, 1.1875rem);
   }
 
   .links-profile {
@@ -1705,19 +1707,19 @@
   .links-avatar {
     display: grid;
     place-items: center;
-    width: 72px;
-    height: 72px;
+    width: clamp(72px, 4rem + 3vw, 112px);
+    height: clamp(72px, 4rem + 3vw, 112px);
     margin-bottom: var(--space-2);
     border-radius: 50%;
     background: var(--cobalt);
     color: var(--on-cobalt);
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
     font-weight: 600;
     object-fit: cover;
   }
 
   .links-name {
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.5rem);
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -1729,13 +1731,13 @@
 
   .links-location {
     color: var(--slate);
-    font-size: 0.875rem;
+    font-size: 0.875em;
   }
 
   .links-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: clamp(0.75rem, 0.5rem + 0.6vw, 1rem);
   }
 
   /* Link-in-bio buttons: one style for every link, rounded pills with the
@@ -1745,7 +1747,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 3.5rem;
+    min-height: clamp(3.5rem, 3rem + 1.2vw, 4.25rem);
     padding-inline: 3.5rem;
     border: 1px solid var(--line);
     border-radius: 999px;
@@ -1770,9 +1772,9 @@
 
   .links-btn-icon {
     position: absolute;
-    left: 1.25rem;
-    width: 1.25rem;
-    height: 1.25rem;
+    left: 1.25em;
+    width: 1.25em;
+    height: 1.25em;
     color: var(--slate);
     transition: color 150ms;
   }
@@ -1793,7 +1795,7 @@
 
   .links-btn-sub {
     color: var(--slate);
-    font-size: 0.8125rem;
+    font-size: 0.8em;
     font-weight: 400;
     overflow-wrap: anywhere;
   }
