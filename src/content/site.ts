@@ -35,6 +35,8 @@ export type Site = {
   now?: string;
   description: string;
   about: string[];
+  // Short facts shown after the location under the home intro.
+  focus: string[];
   email: string;
   emails: SiteEmail[];
   links: SiteLink[];
@@ -54,6 +56,7 @@ export const site: Site = {
   tagline: "Accounting student who also builds software.",
   now: "",
   description: "Accounting student who also builds software.",
+  focus: ["Accounting", "CPA path", "Coding projects"],
   about: [
     "I'm a third-year student at SFU's Beedie School of Business, studying accounting and working toward my CPA.",
     "Outside of class I build coding projects, and I like understanding how the code behind them works.",

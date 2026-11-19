@@ -37,15 +37,19 @@ export default function Home() {
   return (
     <div className="stack">
       <section className="flow">
-        <h1 className="display">{site.name}</h1>
-        <p className="lede">{site.tagline}</p>
+        <h1 className="display">Hey, I&apos;m {site.name.split(" ")[0]}.</h1>
+        <p className="lede measure">{site.about.join(" ")}</p>
         {now ? (
           <p className="now-line">
             <span className="now-label">Now</span>
             <span>{now}</span>
           </p>
         ) : null}
-        <p className="text-slate">{site.location}</p>
+        <ul className="hero-facts" aria-label="At a glance">
+          {[site.location, ...site.focus].map((fact) => (
+            <li key={fact}>{fact}</li>
+          ))}
+        </ul>
         <div className="btn-row">
           <Link href="/resume" className="btn btn--primary">
             View résumé
@@ -84,19 +88,6 @@ export default function Home() {
 
       <TestimonialsSection />
 
-      <section className="flow">
-        <div className="section-head">
-          <h2>About</h2>
-          <Link href="/about" className="text-link">
-            More about me
-          </Link>
-        </div>
-        {site.about.map((paragraph) => (
-          <p key={paragraph} className="measure">
-            {paragraph}
-          </p>
-        ))}
-      </section>
 
       <section className="flow">
         <h2>Get in touch</h2>
