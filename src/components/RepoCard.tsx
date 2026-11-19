@@ -41,7 +41,9 @@ export async function RepoCard({ owner, repo, href, summary }: Props) {
           <strong>{data?.name ?? repo}</strong>
         </a>
       </div>
-      <p className="repo-card-desc">{data?.description ?? summary}</p>
+      {/* Always our own summary: the repo's GitHub description is written for
+          developers and can mention hosting details. */}
+      <p className="repo-card-desc">{summary}</p>
       {data && (
         <ul className="repo-card-meta">
           {data.language && (
