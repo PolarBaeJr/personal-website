@@ -312,10 +312,12 @@
     font-weight: 600;
   }
 
+  /* Column headings in full ink and bolder so they stand above the
+     slate links underneath. */
   .footer-heading {
-    color: var(--slate);
-    font-size: 0.8125rem;
-    font-weight: 500;
+    color: var(--ink);
+    font-size: 0.875rem;
+    font-weight: 600;
     letter-spacing: 0;
     line-height: 1.4;
   }

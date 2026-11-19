@@ -54,7 +54,9 @@ jobs:
         run: npm run lint
 
       - name: Type-check
-        run: npx tsc --noEmit
+        # PageProps/LayoutProps are generated into .next/types; a fresh
+        # checkout has none until typegen (or a build) runs.
+        run: npx next typegen && npx tsc --noEmit
 
       - name: Banned strings
         # Project rules: no clock or randomness calls in render code, no
