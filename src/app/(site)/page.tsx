@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ExperienceRows } from "@/components/ExperienceRows";
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
 
 export default function Home() {
   const { experience } = getResume("general");
+  // T-account item count, set on the section so the .home-experience
+  // animation-delay in CSS can wait until the T-account has finished.
+  const taItems = site.balance.accounting.length + site.balance.building.length;
 
   return (
     <div className="stack">
@@ -31,7 +35,10 @@ export default function Home() {
         <TAccount />
       </section>
 
-      <section className="flow">
+      <section
+        className="flow home-experience"
+        style={{ "--ta-items": taItems } as CSSProperties}
+      >
         <div className="section-head">
           <h2>Experience</h2>
           <Link href="/resume" className="text-link">

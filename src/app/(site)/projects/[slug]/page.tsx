@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { RepoCard } from "@/components/RepoCard";
 import { getProject, projects } from "@/content/projects";
+import { parseGitHubRepo } from "@/lib/github";
 
 export function generateStaticParams() {
   const params = projects.map((project) => ({ slug: project.slug }));
@@ -25,6 +27,12 @@ export default async function ProjectPage({
   const project = getProject(slug);
   if (!project) notFound();
 
+  const githubLink = project.links.find((link) => link.kind === "github");
+  const repo = githubLink ? parseGitHubRepo(githubLink.href) : null;
+  const buttonLinks = repo
+    ? project.links.filter((link) => link !== githubLink)
+    : project.links;
+
   return (
     <article className="flow">
       <p>
@@ -46,9 +54,9 @@ export default async function ProjectPage({
           ))}
         </ul>
       )}
-      {project.links.length > 0 && (
+      {buttonLinks.length > 0 && (
         <div className="btn-row">
-          {project.links.map((link) => (
+          {buttonLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -64,6 +72,14 @@ export default async function ProjectPage({
             </a>
           ))}
         </div>
+      )}
+      {repo && githubLink && (
+        <RepoCard
+          owner={repo.owner}
+          repo={repo.repo}
+          href={githubLink.href}
+          summary={project.summary}
+        />
       )}
     </article>
   );

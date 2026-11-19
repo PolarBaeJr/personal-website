@@ -18,7 +18,9 @@ export function ExperienceRows({
             </h3>
             <ul className="bullets">
               {job.bullets.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
+                <li key={bullet} className="dated-row-bullet">
+                  {bullet}
+                </li>
               ))}
             </ul>
           </div>
