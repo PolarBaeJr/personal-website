@@ -3,9 +3,23 @@
 # :latest digest appears.
 name: Build image
 
+# Only build when something that ends up in the image changes. Every build
+# gets a new digest (timestamps, Next build id) even for identical code, and
+# the dashboard restarts the site for each new digest. Run it by hand from
+# the Actions tab (workflow_dispatch) when needed.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docker/deploy.sh"
+      - "docker/pi.sh"
+      - "docker/docker-compose.yml"
+      - "integrations/**"
+      - "mcp/**"
+      - ".mcp.json"
+      - ".github/**"
+      - "**/*.md"
+      - ".env.example"
   workflow_dispatch:
 
 permissions:
