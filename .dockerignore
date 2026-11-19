@@ -4,6 +4,7 @@ node_modules
 .env
 .env.*
 data
+mcp
 docker/*.sh
 !docker/entrypoint.sh
 .DS_Store

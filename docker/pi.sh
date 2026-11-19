@@ -14,9 +14,22 @@
 
 set -euo pipefail
 
-PI_HOST="${PI_HOST:-pi-remote}"
+# Try each ssh route to the Pi (Tailscale, home LAN, public) and use the
+# first that answers. PI_HOST pins one explicitly.
+pick_host() {
+    if [[ -n "${PI_HOST:-}" ]]; then echo "${PI_HOST}"; return; fi
+    local h
+    for h in pi pi-lan pi-remote; do
+        if ssh -o BatchMode=yes -o ConnectTimeout=5 "${h}" true 2>/dev/null; then
+            echo "${h}"; return
+        fi
+    done
+    return 1
+}
 REMOTE_DIR="${REMOTE_DIR:-~/apps/personal-page}"
 CONTAINER="personal-page"
+
+PI_HOST="$(pick_host)" || { echo "cannot reach the Pi via pi, pi-lan or pi-remote" >&2; exit 1; }
 
 cmd="${1:-shell}"
 [[ $# -gt 0 ]] && shift

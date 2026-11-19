@@ -61,6 +61,19 @@ export const projects: Project[] = [
     draft: false,
   },
   {
+    slug: "personal-site",
+    title: "Personal website",
+    summary:
+      "This site: portfolio, résumé versions and link page, self-hosted on a Raspberry Pi.",
+    description:
+      "TODO: describe the project. Built with Next.js and deployed with Docker behind my homelab proxy-manager.",
+    category: "tech",
+    tags: [],
+    links: [{ kind: "live", href: "https://matthewcheng.net" }],
+    featured: false,
+    draft: false,
+  },
+  {
     slug: "market-tracker",
     title: "Market tracker",
     summary:
