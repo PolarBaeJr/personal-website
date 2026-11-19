@@ -186,7 +186,7 @@
   }
 
   .nav-link:hover,
-  .nav-trigger[aria-expanded="true"] {
+  .nav-details[open] > .nav-trigger {
     color: var(--ink);
   }
 
@@ -197,10 +197,13 @@
   }
 
   .nav-trigger {
-    border: 0;
-    background: none;
-    font: inherit;
     cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .nav-trigger::-webkit-details-marker {
+    display: none;
   }
 
   .nav-chevron {
@@ -210,7 +213,7 @@
     transition: rotate 150ms;
   }
 
-  .nav-trigger[aria-expanded="true"] .nav-chevron {
+  .nav-details[open] > .nav-trigger .nav-chevron {
     rotate: 180deg;
   }
 

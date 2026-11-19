@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isNavGroup, nav, type NavGroup } from "@/content/site";
 
 function isActive(pathname: string, href: string) {
@@ -10,6 +10,9 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+// Built on <details>/<summary> so the menu opens natively even before (or
+// without) hydration, e.g. on a slow phone. JS only adds the extras: closing
+// on an outside tap, Escape, focus leaving, or picking an item.
 function NavDropdown({
   group,
   pathname,
@@ -18,28 +21,32 @@ function NavDropdown({
   pathname?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLLIElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuId = useId();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   const groupActive =
     pathname !== undefined &&
     group.items.some((item) => isActive(pathname, item.href));
 
-  // State only changes inside event callbacks, never synchronously in an
-  // effect body; route changes are handled by the parent's key remount.
+  function close() {
+    if (detailsRef.current) detailsRef.current.open = false;
+  }
+
+  // `open` mirrors the element via onToggle (an event callback); the effect
+  // only wires document listeners while the menu is open. Route changes are
+  // handled by the parent's key remount.
   useEffect(() => {
     if (!open) return;
     function onPointerDown(event: PointerEvent) {
       if (
         event.target instanceof Node &&
-        !rootRef.current?.contains(event.target)
+        !detailsRef.current?.contains(event.target)
       ) {
-        setOpen(false);
+        close();
       }
     }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setOpen(false);
+        close();
         triggerRef.current?.focus();
       }
     }
@@ -52,64 +59,63 @@ function NavDropdown({
   }, [open]);
 
   return (
-    <li
-      ref={rootRef}
-      className="nav-group"
-      onBlur={(event) => {
-        if (
-          event.relatedTarget instanceof Node &&
-          !event.currentTarget.contains(event.relatedTarget)
-        ) {
-          setOpen(false);
-        }
-      }}
-    >
-      <button
-        ref={triggerRef}
-        type="button"
-        className="nav-link nav-trigger"
-        aria-expanded={open}
-        aria-controls={menuId}
-        data-active={groupActive ? "" : undefined}
-        onClick={() => setOpen((value) => !value)}
-        suppressHydrationWarning
+    <li className="nav-group">
+      <details
+        ref={detailsRef}
+        className="nav-details"
+        onToggle={(event) => setOpen(event.currentTarget.open)}
+        onBlur={(event) => {
+          if (
+            event.relatedTarget instanceof Node &&
+            !event.currentTarget.contains(event.relatedTarget)
+          ) {
+            close();
+          }
+        }}
       >
-        {group.label}
-        <svg
-          className="nav-chevron"
-          aria-hidden="true"
-          focusable="false"
-          viewBox="0 0 12 12"
+        <summary
+          ref={triggerRef}
+          className="nav-link nav-trigger"
+          data-active={groupActive ? "" : undefined}
+          suppressHydrationWarning
         >
-          <path
-            d="M2.5 4.5 6 8l3.5-3.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      <ul id={menuId} className="nav-menu" hidden={!open}>
-        {group.items.map((item) => {
-          const active =
-            pathname !== undefined && isActive(pathname, item.href);
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className="nav-menu-link"
-                aria-current={active ? "page" : undefined}
-                onClick={() => setOpen(false)}
-                suppressHydrationWarning
-              >
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+          {group.label}
+          <svg
+            className="nav-chevron"
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 12 12"
+          >
+            <path
+              d="M2.5 4.5 6 8l3.5-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </summary>
+        <ul className="nav-menu">
+          {group.items.map((item) => {
+            const active =
+              pathname !== undefined && isActive(pathname, item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className="nav-menu-link"
+                  aria-current={active ? "page" : undefined}
+                  onClick={close}
+                  suppressHydrationWarning
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </details>
     </li>
   );
 }
