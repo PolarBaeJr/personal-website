@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "resume": {
+      "command": "node",
+      "args": ["mcp/src/index.ts"],
+      "env": {
+        "RESUME_API_URL": "${RESUME_API_URL:-https://matthewcheng.net}",
+        "RESUME_API_TOKEN": "${RESUME_API_TOKEN}"
+      }
+    }
+  }
+}
