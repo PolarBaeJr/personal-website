@@ -129,8 +129,42 @@ CREATE TABLE IF NOT EXISTS oauth_tokens (
 CREATE INDEX IF NOT EXISTS oauth_tokens_by_client ON oauth_tokens(client_id);
 `;
 
+// The photo library: one row per file in the media folder. Files that
+// arrived before this table are added the first time the library is listed.
+const MEDIA_SCHEMA = `
+CREATE TABLE IF NOT EXISTS media (
+  file TEXT PRIMARY KEY,
+  width INTEGER,
+  height INTEGER,
+  bytes INTEGER,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  label TEXT DEFAULT ''
+);
+`;
+
+// One-time upload links for the Claude app, and failed tries at them for
+// throttling. Tokens are stored as sha256 hex only. Times are SQLite's (UTC).
+const UPLOAD_LINKS_SCHEMA = `
+CREATE TABLE IF NOT EXISTS upload_links (
+  id TEXT PRIMARY KEY,
+  token_hash TEXT UNIQUE NOT NULL,
+  note TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TEXT NOT NULL,
+  used_at TEXT,
+  src TEXT,
+  width INTEGER,
+  height INTEGER
+);
+CREATE TABLE IF NOT EXISTS upload_link_failures (
+  at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ip TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS upload_link_failures_by_at ON upload_link_failures(at);
+`;
+
 // MIGRATIONS[i] takes user_version i to i + 1.
-const MIGRATIONS = [SCHEMA, OWNER_SCHEMA, OAUTH_SCHEMA];
+const MIGRATIONS = [SCHEMA, OWNER_SCHEMA, OAUTH_SCHEMA, MEDIA_SCHEMA, UPLOAD_LINKS_SCHEMA];
 
 function migrate(db: DatabaseSync) {
   const version = () =>

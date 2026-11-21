@@ -5,19 +5,24 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { TextField } from "@/components/admin/Fields";
 import { useIssue } from "@/components/admin/FormIssues";
 import { SortableList } from "@/components/admin/SortableList";
+import { formatWhen } from "@/lib/admin/fields";
 import { NOT_REACHED, SIGNED_OUT } from "@/lib/admin/form-state";
-import { MAX_EDGE, MAX_ORIGINAL_BYTES, UPLOAD_TARGET_BYTES } from "@/lib/media/limits";
+import { MAX_ORIGINAL_BYTES } from "@/lib/media/limits";
+import { shrinkPhoto } from "@/lib/media/shrink-client";
 
 // Photo fields for the editors. A chosen file goes straight to /api/media
 // (never with the editor's form, which has a 1 MB cap); the field then holds
 // the returned src, width and height until the editor is saved. The proxy
 // in front of the site refuses bodies over about 1 MB, so photos are shrunk
-// on the device first.
+// on the device first. "Choose from your photos" picks one already in the
+// library instead.
 
 export type ImageValue = { src: string; alt?: string; width?: number; height?: number };
 export type ListImage = ImageValue & { alt: string };
 
 type Uploaded = { src: string; width: number; height: number };
+
+type LibraryPhoto = Uploaded & { created_at: string; used_on: string[] };
 
 type UploadState =
   | { kind: "idle" }
@@ -28,8 +33,6 @@ type UploadState =
 const TOO_BIG = "That photo is over 40 MB. Pick a smaller one.";
 const TOO_LARGE = "That photo is too large to upload. Try a smaller one.";
 const UNREADABLE = "This photo couldn't be read here. Try a JPEG or PNG.";
-const PASS_THROUGH = ["image/jpeg", "image/png", "image/webp"];
-const QUALITIES = [0.86, 0.78, 0.7, 0.6];
 const ALT_HINT =
   "Required. A few words for people who can't see it, like 'Presenting at the case competition'.";
 
@@ -43,90 +46,7 @@ function useLatest<T>(value: T) {
   return ref;
 }
 
-type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void };
-
-async function decode(file: File): Promise<Decoded | null> {
-  try {
-    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-    return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
-  } catch {}
-  const url = URL.createObjectURL(file);
-  try {
-    const img = document.createElement("img");
-    img.src = url;
-    await img.decode();
-    return {
-      source: img,
-      width: img.naturalWidth,
-      height: img.naturalHeight,
-      close: () => URL.revokeObjectURL(url),
-    };
-  } catch {
-    URL.revokeObjectURL(url);
-    return null;
-  }
-}
-
-function draw(image: Decoded, width: number, height: number) {
-  if (typeof OffscreenCanvas !== "undefined") {
-    const canvas = new OffscreenCanvas(width, height);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    // JPEG has no transparency; white beats black behind a transparent PNG.
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, width, height);
-    ctx.drawImage(image.source, 0, 0, width, height);
-    return (quality: number) => canvas.convertToBlob({ type: "image/jpeg", quality });
-  }
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, width, height);
-  ctx.drawImage(image.source, 0, 0, width, height);
-  return (quality: number) =>
-    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-}
-
-// A JPEG of the photo with its long edge at most MAX_EDGE and its size at
-// most UPLOAD_TARGET_BYTES, or the file itself when it already fits. The
-// re-encode drops EXIF; the server strips metadata again anyway.
-async function shrink(file: File): Promise<Blob | null> {
-  const image = await decode(file);
-  if (!image) return null;
-  try {
-    const long = Math.max(image.width, image.height);
-    if (!long) return null;
-    if (PASS_THROUGH.includes(file.type) && file.size <= UPLOAD_TARGET_BYTES && long <= MAX_EDGE) {
-      return file;
-    }
-    let scale = Math.min(1, MAX_EDGE / long);
-    for (let step = 0; step < 12; step++) {
-      const encode = draw(
-        image,
-        Math.max(1, Math.round(image.width * scale)),
-        Math.max(1, Math.round(image.height * scale)),
-      );
-      if (!encode) return null;
-      // Lower quality first at full size, then only the lowest when smaller.
-      for (const quality of step === 0 ? QUALITIES : QUALITIES.slice(-1)) {
-        const blob = await encode(quality);
-        if (!blob) return null;
-        if (blob.size <= UPLOAD_TARGET_BYTES) return blob;
-      }
-      scale *= 0.8;
-    }
-    return null;
-  } catch {
-    return null;
-  } finally {
-    image.close();
-  }
-}
-
-function useImageUpload(csrf: string) {
+export function useImageUpload(csrf: string) {
   const [state, setState] = useState<UploadState>({ kind: "idle" });
 
   async function upload(file: File): Promise<Uploaded | null> {
@@ -139,7 +59,7 @@ function useImageUpload(csrf: string) {
       return null;
     }
     setState({ kind: "preparing" });
-    const photo = await shrink(file);
+    const photo = await shrinkPhoto(file);
     if (!photo) {
       setState({ kind: "error", message: UNREADABLE });
       return null;
@@ -194,7 +114,7 @@ function useImageUpload(csrf: string) {
   return { state, upload, fail };
 }
 
-function UploadButton({
+export function UploadButton({
   label,
   state,
   onFile,
@@ -233,7 +153,7 @@ function UploadButton({
   );
 }
 
-function UploadStatus({ state }: { state: UploadState }) {
+export function UploadStatus({ state }: { state: UploadState }) {
   return (
     <>
       <p className="admin-hint" role="status" aria-live="polite">
@@ -244,6 +164,104 @@ function UploadStatus({ state }: { state: UploadState }) {
             : ""}
       </p>
       {state.kind === "error" && <p className="admin-error">{state.message}</p>}
+    </>
+  );
+}
+
+type PickerState =
+  | { kind: "closed" }
+  | { kind: "loading" }
+  | { kind: "open"; photos: LibraryPhoto[] }
+  | { kind: "error"; message: string };
+
+// "Choose from your photos": the library, fetched when the button is
+// pressed, as a panel of thumbnails under the field.
+function PhotoPicker({
+  csrf,
+  disabled,
+  onPick,
+}: {
+  csrf: string;
+  disabled: boolean;
+  onPick: (photo: Uploaded) => void;
+}) {
+  const [state, setState] = useState<PickerState>({ kind: "closed" });
+
+  async function open() {
+    setState({ kind: "loading" });
+    let res: Response;
+    try {
+      res = await fetch("/api/media/list", {
+        headers: { "x-csrf-token": csrf },
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+    } catch {
+      setState({ kind: "error", message: NOT_REACHED });
+      return;
+    }
+    if (res.status === 401 || res.status === 403) {
+      setState({ kind: "error", message: SIGNED_OUT });
+      return;
+    }
+    const photos = res.ok ? ((await res.json().catch(() => null)) as LibraryPhoto[] | null) : null;
+    if (!Array.isArray(photos)) {
+      setState({ kind: "error", message: "Your photos couldn't be loaded. Try again." });
+      return;
+    }
+    setState({ kind: "open", photos });
+  }
+
+  const shown = state.kind === "open" || state.kind === "loading";
+  return (
+    <>
+      <button
+        type="button"
+        className="admin-btn"
+        disabled={disabled || state.kind === "loading"}
+        aria-expanded={shown}
+        onClick={() => (state.kind === "open" ? setState({ kind: "closed" }) : open())}
+      >
+        {state.kind === "loading" ? "Loading your photos…" : "Choose from your photos"}
+      </button>
+      {state.kind === "error" && <p className="admin-error admin-picker-note">{state.message}</p>}
+      {state.kind === "open" && (
+        <div className="admin-photo-picker" role="group" aria-label="Your photos">
+          {state.photos.length === 0 ? (
+            <p className="admin-muted">No photos yet. Upload one first.</p>
+          ) : (
+            <ul className="admin-photo-grid">
+              {state.photos.map((photo) => (
+                <li key={photo.src}>
+                  <button
+                    type="button"
+                    className="admin-photo-choice"
+                    onClick={() => {
+                      setState({ kind: "closed" });
+                      onPick({ src: photo.src, width: photo.width, height: photo.height });
+                    }}
+                  >
+                    <span className="admin-photo-thumb">
+                      <Image src={photo.src} alt="" fill sizes="10rem" className="admin-image" />
+                    </span>
+                    <span className="admin-photo-meta">
+                      {photo.used_on.length > 0 ? photo.used_on.join(", ") : "Not used yet"}
+                      <span className="sr-only">, added {formatWhen(photo.created_at)}</span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <button
+            type="button"
+            className="admin-btn admin-btn--quiet"
+            onClick={() => setState({ kind: "closed" })}
+          >
+            Close
+          </button>
+        </div>
+      )}
     </>
   );
 }
@@ -284,19 +302,23 @@ export function ImageField({
   shape: "square" | "wide";
 }) {
   const { state, upload } = useImageUpload(csrf);
+  const busy = state.kind === "preparing" || state.kind === "uploading";
   const latest = useLatest({ value, onChange });
   // Without alt the value is a plain string, so issues point at the path.
   const plainError = useIssue(withAlt ? undefined : path);
 
-  async function onFile(file: File) {
-    const done = await upload(file);
-    if (!done) return;
+  function apply(done: Uploaded) {
     const { value, onChange } = latest.current;
     onChange(
       withAlt
         ? { ...value, src: done.src, width: done.width, height: done.height, alt: value?.alt ?? "" }
         : { src: done.src },
     );
+  }
+
+  async function onFile(file: File) {
+    const done = await upload(file);
+    if (done) apply(done);
   }
 
   return (
@@ -310,6 +332,7 @@ export function ImageField({
           state={state}
           onFile={onFile}
         />
+        <PhotoPicker csrf={csrf} disabled={busy} onPick={apply} />
         {value && (
           <button
             type="button"
@@ -363,15 +386,18 @@ export function ImageListField({
     onChange(next);
   }
 
-  async function onFile(file: File) {
-    const done = await upload(file);
-    if (!done) return;
+  function add(done: Uploaded) {
     const { items, onChange } = latest.current;
     if (items.some((i) => i.src === done.src)) {
       fail("That photo is already here.");
       return;
     }
     onChange([...items, { src: done.src, width: done.width, height: done.height, alt: "" }]);
+  }
+
+  async function onFile(file: File) {
+    const done = await upload(file);
+    if (done) add(done);
   }
 
   return (
@@ -426,6 +452,11 @@ export function ImageListField({
       )}
       <div className="admin-image-actions">
         <UploadButton label={addLabel} state={state} onFile={onFile} />
+        <PhotoPicker
+          csrf={csrf}
+          disabled={state.kind === "preparing" || state.kind === "uploading"}
+          onPick={add}
+        />
       </div>
       <UploadStatus state={state} />
     </div>

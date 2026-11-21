@@ -13,3 +13,6 @@ export const MAX_ORIGINAL_BYTES = 40 * 1024 * 1024;
 
 export const MEDIA_FILE_RE = /^[a-f0-9]{64}\.(webp|jpg)$/;
 export const MEDIA_SRC_RE = /^\/media\/[a-f0-9]{64}\.(webp|jpg)$/;
+
+// Shown for any bad, used or expired one-time upload link.
+export const UPLOAD_LINK_CLOSED = "This link has expired. Ask Claude for a new one.";

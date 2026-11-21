@@ -33,7 +33,7 @@
     /* Layout */
     --radius: 10px;
     --gutter: 24px;
-    --container: 72rem;
+    --container: 80rem;
     --measure: 68ch;
   }
 
@@ -1088,6 +1088,41 @@
     .taccount-total-cell--debit,
     .taccount-total-cell--credit {
       padding-inline: 0;
+    }
+  }
+
+  /* Home hero: stacked below 1100px. Above it the heading and intro sit on
+     the left and the T-account on the right, centred against them. Areas are
+     named so the owner's edit link and the loading placeholder stay left. */
+  @media (min-width: 1100px) {
+    .home-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-rows: auto auto 1fr;
+      grid-template-areas:
+        "title ta"
+        "edit ta"
+        "intro ta";
+      column-gap: var(--space-6);
+    }
+
+    .home-hero > .display {
+      grid-area: title;
+    }
+
+    .home-hero > .owner-edit {
+      grid-area: edit;
+    }
+
+    .home-hero > .home-intro,
+    .home-hero > .skeleton {
+      grid-area: intro;
+    }
+
+    .home-hero > .taccount {
+      grid-area: ta;
+      align-self: center;
+      margin-top: 0;
     }
   }
 
@@ -3158,6 +3193,100 @@
     gap: var(--space-2);
   }
 
+  .admin-picker-note {
+    flex-basis: 100%;
+  }
+
+  /* Choose from your photos: a panel of thumbnails under the buttons. */
+  .admin-photo-picker {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    flex-basis: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+  }
+
+  .admin-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: var(--space-3);
+    width: 100%;
+    max-height: 24rem;
+    overflow-y: auto;
+  }
+
+  .admin-photo-choice {
+    display: grid;
+    gap: var(--space-1);
+    width: 100%;
+    padding: var(--space-1);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .admin-photo-choice:hover,
+  .admin-photo-choice:focus-visible {
+    border-color: var(--cobalt);
+  }
+
+  .admin-photo-thumb {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .admin-photo-meta {
+    color: var(--slate);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+  }
+
+  /* Photos page */
+  .admin-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--space-3);
+  }
+
+  .admin-photo-card {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    min-width: 0;
+  }
+
+  .admin-photo-card .admin-photo-thumb {
+    background: var(--bg);
+  }
+
+  .admin-photo-facts {
+    display: grid;
+    gap: 0.15rem;
+    color: var(--slate);
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-photo-used {
+    color: var(--ink);
+  }
+
   /* Sign-in */
   .admin-login {
     display: grid;
@@ -3173,6 +3302,23 @@
   .admin-login-form {
     display: grid;
     gap: var(--space-3);
+  }
+
+  /* One-time upload link page: same frame as sign-in. */
+  .upload-link-note {
+    color: var(--slate);
+    overflow-wrap: anywhere;
+  }
+
+  .upload-link-button {
+    min-height: 3.25rem;
+    font-size: 1.0625rem;
+  }
+
+  .upload-link-done {
+    color: var(--teal);
+    font-size: 1.25rem;
+    font-weight: 600;
   }
 
   /* Connecting an app: Allow and Deny side by side. */

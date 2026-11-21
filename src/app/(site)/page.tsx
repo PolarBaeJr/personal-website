@@ -28,25 +28,27 @@ function Intro({ site, home }: { site: Site; home: HomeData }) {
   const now = site.now?.trim();
   return (
     <>
-      <p className="lede measure">{site.about.join(" ")}</p>
-      {now ? (
-        <p className="now-line">
-          <span className="now-label">Now</span>
-          <span>{now}</span>
-        </p>
-      ) : null}
-      <ul className="hero-facts" aria-label="At a glance">
-        {[site.location, ...site.focus].map((fact) => (
-          <li key={fact}>{fact}</li>
-        ))}
-      </ul>
-      <div className="btn-row">
-        <Link href="/resume" className="btn btn--primary">
-          View résumé
-        </Link>
-        <a href="#contact" className="btn btn--outline">
-          Get in touch
-        </a>
+      <div className="flow home-intro">
+        <p className="lede measure">{site.about.join(" ")}</p>
+        {now ? (
+          <p className="now-line">
+            <span className="now-label">Now</span>
+            <span>{now}</span>
+          </p>
+        ) : null}
+        <ul className="hero-facts" aria-label="At a glance">
+          {[site.location, ...site.focus].map((fact) => (
+            <li key={fact}>{fact}</li>
+          ))}
+        </ul>
+        <div className="btn-row">
+          <Link href="/resume" className="btn btn--primary">
+            View résumé
+          </Link>
+          <a href="#contact" className="btn btn--outline">
+            Get in touch
+          </a>
+        </div>
       </div>
       <TAccount balance={home.balance} />
     </>
@@ -134,7 +136,7 @@ async function LiveFeaturedProjects() {
 export default function Home() {
   return (
     <div className="stack">
-      <section className="flow">
+      <section className="flow home-hero">
         <h1 className="display">
           Hey, I&apos;m {siteIdentity.name.split(" ")[0]}.
         </h1>

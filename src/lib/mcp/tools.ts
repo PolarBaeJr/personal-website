@@ -1,5 +1,5 @@
-// MCP tools for the site's token-protected API: résumés, content sections
-// and blog posts. Shared by the stdio server in mcp/ and the remote server
+// MCP tools for the site's token-protected API: résumés, content sections,
+// photos and blog posts. Shared by the stdio server in mcp/ and the remote server
 // at src/app/mcp (through src/lib/mcp/remote.ts), so relative imports and
 // packages only (no "@/", next/* or server-only), and it must type-check
 // under both the root and mcp/ tsconfigs. The
@@ -412,10 +412,10 @@ export function registerTools(server: McpServer, { call, pdf, localFiles }: Tool
     "upload_image",
     {
       description:
-        "Upload a photo to the site and get back its src, width and height. Give exactly one of path, data_base64 or url. Then set it with get_content + update_content: site.avatar = src (a string); or push { src, alt, width, height } onto projects.projects[i].images; or set about.hobbies[i].image = { src, alt, width, height }. alt is required: a short description of the photo. The photo is resized to at most 2000px, converted to WebP, and all metadata (including location) is removed. With path or url, photos are shrunk automatically to fit the upload limit. " +
+        "Upload a photo to the site and get back its src, width and height. Give exactly one of path, data_base64 or url. For a photo the user has on their phone or computer (or attached in the chat), use create_upload_link instead when path isn't available: attached photos can't be passed to this tool. url is for public images. Then set it with get_content + update_content: site.avatar = src (a string); or push { src, alt, width, height } onto projects.projects[i].images; or set about.hobbies[i].image = { src, alt, width, height }. alt is required: a short description of the photo. The photo is resized to at most 2000px, converted to WebP, and all metadata (including location) is removed. With path or url, photos are shrunk automatically to fit the upload limit. " +
         (localFiles
           ? "path is a local file on this computer (JPEG, PNG or WebP, up to 15 MB)."
-          : "path doesn't work here; use a public https url, or data_base64 for small images (under about 700 KB)."),
+          : "path doesn't work here. For a photo on the user's device, use create_upload_link; otherwise a public https url, or data_base64 for small images (under about 700 KB)."),
       inputSchema: {
         path: z
           .string()
@@ -468,6 +468,42 @@ export function registerTools(server: McpServer, { call, pdf, localFiles }: Tool
           next: "Now set it with get_content + update_content (see the description).",
         });
       }),
+  );
+
+  server.registerTool(
+    "list_images",
+    {
+      description:
+        "List the photos already uploaded to the site, newest first: src, width, height, created_at (UTC) and used_on (where the current content shows it; empty if unused). Reuse one by setting its src, width and height with update_content (see upload_image).",
+      inputSchema: {},
+    },
+    () => guarded(() => getJson("/api/media/list")),
+  );
+
+  server.registerTool(
+    "create_upload_link",
+    {
+      description:
+        "Make a one-time link the user opens to send a photo from their own phone or computer (no sign-in). Use this for photos on the user's device, including ones attached in the chat, which can't be passed to upload_image. Give the user the url and ask them to open it and choose the photo. Then call get_upload_link with the id; if it says waiting, wait a little and call it again a few times. When it says done, set the photo with get_content + update_content using its src, width and height, as for upload_image. The link works once and expires after 15 minutes.",
+      inputSchema: {
+        note: z
+          .string()
+          .max(200)
+          .optional()
+          .describe("Shown on the page, e.g. 'a photo for your badminton hobby'"),
+      },
+    },
+    ({ note }) => guarded(() => send("/api/media/links", "POST", { note }, 201)),
+  );
+
+  server.registerTool(
+    "get_upload_link",
+    {
+      description:
+        "Check a link from create_upload_link: status is waiting (not sent yet), done (with src, width and height) or expired.",
+      inputSchema: { id: z.string().uuid().describe("The id from create_upload_link") },
+    },
+    ({ id }) => guarded(() => getJson(`/api/media/links/${id}`)),
   );
 
   // ---- Blog posts ----

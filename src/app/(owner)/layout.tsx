@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-// Sign-in and admin pages: never indexed, never linked from the public site.
+// Sign-in, admin and one-time upload link pages: never indexed, never
+// linked from the public site.
 // They read the session cookie at the top of the page and wait for it,
 // which is fine for one person, so they opt out of the instant-navigation
 // check.

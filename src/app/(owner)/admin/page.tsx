@@ -20,6 +20,7 @@ const PLACES = [
   { href: "/admin/posts", title: "Blog posts", text: "Write, edit and delete posts." },
   { href: "/admin/socials", title: "Links page", text: "The rows on /socials." },
   { href: "/admin/resume", title: "Résumés", text: "Versions and PDFs." },
+  { href: "/admin/photos", title: "Photos", text: "Every photo you've uploaded, and where it's used." },
   {
     href: "/admin/connected-apps",
     title: "Connected apps",

@@ -5,7 +5,8 @@ import { ensureContentSeeded, getWriteContentDb } from "@/lib/content-data";
 import { deleteAllOAuthGrants, revokeClient } from "@/lib/content-store/oauth";
 import { isSectionName } from "@/lib/content-store/schema";
 import { SIGNED_OUT, type FormState } from "@/lib/admin/form-state";
-import { checkOwner } from "@/lib/owner";
+import { deletePhoto } from "@/lib/media/library";
+import { checkOwner, requireOwner } from "@/lib/owner";
 import { ensureSeeded } from "@/lib/resume-data";
 import { isResumeType } from "@/lib/resume-types";
 import { restoreSection, saveSection } from "@/lib/write/content";
@@ -243,4 +244,15 @@ export async function disconnectAllAppsAction(formData: FormData): Promise<void>
     }
   }
   redirect("/admin/connected-apps");
+}
+
+// Admin, Photos. Deletes only a photo nothing uses (checked again inside).
+export async function deletePhotoAction(formData: FormData): Promise<void> {
+  await requireOwner(formData.get("csrf"));
+  try {
+    await deletePhoto(text(formData, "file"));
+  } catch (e) {
+    console.error(`admin delete photo: ${(e as Error).message}`);
+  }
+  redirect("/admin/photos");
 }
