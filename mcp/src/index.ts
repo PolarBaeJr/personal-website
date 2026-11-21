@@ -7,7 +7,7 @@ import { registerTools } from "../../src/lib/mcp/tools.ts";
 import { call } from "./api.ts";
 
 const server = new McpServer({ name: "resume", version: "1.1.0" });
-registerTools(server, { call, pdf: "file" });
+registerTools(server, { call, pdf: "file", localFiles: true });
 
 await server.connect(new StdioServerTransport());
 console.error("resume-mcp: ready");

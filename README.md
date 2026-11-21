@@ -20,7 +20,7 @@ The files under `src/content/` and `content/posts/` are now seeds: they fill the
 
 | What | Section | Seed |
 | --- | --- | --- |
-| Tagline, about, emails, location, social links, footer lines, avatar | `site` | `src/content/site.ts` (`siteSeed`) |
+| Tagline, about, emails, location, social links, footer lines, avatar (upload in Admin) | `site` | `src/content/site.ts` (`siteSeed`) |
 | Featured projects, home experience, home T-account | `home` | `src/content/home.ts` |
 | Competitions, clubs, hobbies, testimonials | `about` | `src/content/about.ts` |
 | Projects (drafts and hidden ones are not shown to visitors) | `projects` | `src/content/projects.ts` |
@@ -59,6 +59,16 @@ Turning it off or locking everyone out:
 - Sessions last 14 days from the last visit. Five wrong passwords from one address pause sign-in there for 15 minutes; twenty in an hour pause it for everyone for an hour.
 
 Behind Cloudflare and the reverse proxy: saving uses Next.js Server Actions, which refuse a request whose `Origin` doesn't match the `Host` (or `X-Forwarded-Host`) the app sees. The proxy must pass the public host name through (`Host: matthewcheng.net`, or `X-Forwarded-Host`). If saving or signing in fails with "didn't reach the site" (and the server log says the `x-forwarded-host` or `host` header "does not match `origin`"), that is the first thing to check.
+
+## Photos
+
+Upload photos from Admin (the profile photo on About you, screenshots on Projects, hobby photos on Other involvements) or with the MCP `upload_image` tool.
+
+- JPEG, PNG or WebP, up to 15 MB and 50 megapixels. An iPhone HEIC photo usually arrives as JPEG from the photo picker; if it doesn't, export it as JPEG.
+- Photos are resized to at most 2000px and saved as WebP with all metadata (including location) removed. Each is named by its content hash in `MEDIA_DIR` (`/data/media` on the Pi, inside the data volume, so it is backed up with it).
+- Files that are no longer used are kept, so restoring an older version from History keeps working.
+- Uploads go to `POST /api/media`, with the API token or the owner session.
+- Cloudflare must allow request bodies of 16 MB (the free plan allows 100 MB).
 
 ## Using the site from the Claude app
 

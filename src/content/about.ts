@@ -42,8 +42,9 @@ export const aboutSeed: About = {
     // { name: "Club name", role: "Role", start: "Mon YYYY", end: "Mon YYYY" },
   ],
 
-  // image.src is a local file in public/hobbies/, written "/hobbies/x.jpg"
-  // (no web URLs or ? query strings); image.alt is required.
+  // image.src is a photo uploaded in Admin ("/media/<sha256>.webp", with its
+  // width and height), or a local file in public/hobbies/, written
+  // "/hobbies/x.jpg" (no web URLs or ? query strings); image.alt is required.
   hobbies: [
     // {
     //   name: "Hobby name",

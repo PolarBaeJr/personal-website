@@ -46,6 +46,7 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
     RESUME_DB=/data/resume.db \
+    MEDIA_DIR=/data/media \
     TECTONIC_CACHE_DIR=/opt/tectonic-cache
 
 # tectonic downloads its bundle over HTTPS.
@@ -67,10 +68,14 @@ COPY --from=build /app/src/lib/resume-types.ts ./src/lib/resume-types.ts
 COPY --from=build /app/src/lib/content-store ./src/lib/content-store
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-# /data holds runtime state (the résumé SQLite DB) on a volume.
-RUN mkdir -p /data /opt/tectonic-cache \
- && chown node:node /data /opt/tectonic-cache \
+# /data holds runtime state (the SQLite DBs and uploaded photos) on a volume.
+# .next/cache/images must be writable, or next/image re-encodes every photo
+# on every request.
+RUN mkdir -p /data /opt/tectonic-cache /app/.next/cache/images \
+ && chown node:node /data /opt/tectonic-cache /app/.next/cache/images \
  && chmod +x /usr/local/bin/entrypoint.sh
+# Fails the build if sharp's native binary for this platform is missing.
+RUN node -e "const s=require('sharp');console.log('sharp',s.versions.sharp,'vips',s.versions.vips,'heif input',!!s.format.heif.input.buffer)"
 USER node
 
 # Warm tectonic's bundle and format cache as the node user, so runtime

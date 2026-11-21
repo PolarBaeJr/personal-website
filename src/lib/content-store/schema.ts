@@ -42,8 +42,14 @@ const image = z
         "must be /hobbies/<file> or /media/<sha256>.webp|jpg",
       ),
     alt: text,
+    width: z.number().int().min(1).max(10000).optional(),
+    height: z.number().int().min(1).max(10000).optional(),
   })
-  .strict();
+  .strict()
+  .refine((i) => (i.width === undefined) === (i.height === undefined), {
+    message: "width and height go together",
+    path: ["width"],
+  });
 
 const email = z
   .object({
@@ -68,7 +74,7 @@ export const siteSchema = z
     links: z.array(siteLink),
     location: text,
     footerLines: z.array(text),
-    // Path to a photo in public/ (e.g. "/avatar.jpg"). Replaces the initials on /socials.
+    // A photo uploaded in Admin ("/media/<sha256>.webp"), or a file in public/ like "/avatar.jpg". Replaces the initials on /socials.
     avatar: z.string().regex(/^\/(?!\/)\S+$/, 'must start with "/"').optional(),
   })
   .strict()

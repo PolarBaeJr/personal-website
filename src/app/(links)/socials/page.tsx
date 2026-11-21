@@ -68,8 +68,8 @@ function LinksBody({
           <Image
             src={site.avatar}
             alt={siteIdentity.name}
-            width={72}
-            height={72}
+            width={112}
+            height={112}
             className="links-avatar"
           />
         ) : (

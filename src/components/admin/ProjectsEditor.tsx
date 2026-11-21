@@ -10,6 +10,7 @@ import {
   TextArea,
   TextField,
 } from "@/components/admin/Fields";
+import { ImageListField } from "@/components/admin/ImageField";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { useSaveForm } from "@/components/admin/useSaveForm";
 import { ProjectList } from "@/components/ProjectList";
@@ -28,6 +29,9 @@ function serialize(data: ProjectsSection): ProjectsSection {
       description: p.description.trim(),
       tags: cleanLines(p.tags),
       links: p.links.map((link) => ({ ...link, href: link.href.trim() })),
+      images: p.images?.length
+        ? p.images.map((i) => ({ ...i, alt: (i.alt ?? "").trim() }))
+        : undefined,
     })),
   };
 }
@@ -203,9 +207,15 @@ export function ProjectsEditor({
               checked={p.draft}
               onChange={(draft) => update({ ...p, draft })}
             />
-            {p.images && p.images.length > 0 && (
-              <p className="admin-hint">Its photos stay as they are.</p>
-            )}
+            <ImageListField
+              label="Screenshots"
+              hint="Shown on the project's page, in this order."
+              path={`${path}.images`}
+              items={p.images ?? []}
+              onChange={(images) => update({ ...p, images })}
+              csrf={csrf}
+              addLabel="Add a screenshot"
+            />
           </>
         )}
       />

@@ -8,6 +8,7 @@ import {
 } from "@/components/AboutViews";
 import { EditorForm } from "@/components/admin/EditorForm";
 import { optional, TextArea, TextField } from "@/components/admin/Fields";
+import { ImageField } from "@/components/admin/ImageField";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { useSaveForm } from "@/components/admin/useSaveForm";
 import { saveSectionAction } from "@/app/(owner)/admin/actions";
@@ -43,7 +44,12 @@ function serialize(about: About): About {
       href: optional(c.href),
       hidden: c.hidden,
     })),
-    hobbies: about.hobbies.map((h) => ({ ...h, name: h.name.trim(), blurb: h.blurb.trim() })),
+    hobbies: about.hobbies.map((h) => ({
+      ...h,
+      name: h.name.trim(),
+      blurb: h.blurb.trim(),
+      image: h.image ? { ...h.image, alt: h.image.alt.trim() } : undefined,
+    })),
     testimonials: about.testimonials.map((t) => ({
       ...t,
       quote: t.quote.trim(),
@@ -227,7 +233,15 @@ export function AboutEditor({
               rows={3}
               onChange={(blurb) => update({ ...h, blurb })}
             />
-            {h.image && <p className="admin-hint">Its photo stays as it is.</p>}
+            <ImageField
+              label="Photo"
+              hint="Optional. Shown at the top of the card."
+              path={`${path}.image`}
+              value={h.image}
+              onChange={(image) => update({ ...h, image: image as Hobby["image"] })}
+              csrf={csrf}
+              shape="wide"
+            />
           </>
         )}
       />

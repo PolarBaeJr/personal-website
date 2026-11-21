@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { io } from "next/cache";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditLink } from "@/components/EditLink";
@@ -30,6 +31,32 @@ export async function generateMetadata({
   const project = await getProject(slug);
   if (!project) return {};
   return { title: project.title, description: project.summary };
+}
+
+type ProjectImage = NonNullable<Project["images"]>[number];
+
+const SHOT_SIZES = "(max-width: 48rem) 100vw, 48rem";
+
+// Natural ratio when the size is known; otherwise a fixed 16:10 frame.
+function ProjectShot({ image, first }: { image: ProjectImage; first: boolean }) {
+  if (image.width && image.height) {
+    return (
+      <Image
+        src={image.src}
+        alt={image.alt}
+        width={image.width}
+        height={image.height}
+        sizes={SHOT_SIZES}
+        className="shot-image"
+        preload={first}
+      />
+    );
+  }
+  return (
+    <div className="shot-frame">
+      <Image src={image.src} alt={image.alt} fill sizes={SHOT_SIZES} className="shot-frame-image" />
+    </div>
+  );
 }
 
 function ProjectBody({ project }: { project: Project }) {
@@ -73,6 +100,15 @@ function ProjectBody({ project }: { project: Project }) {
             </a>
           ))}
         </div>
+      )}
+      {project.images && project.images.length > 0 && (
+        <ul className="shot-list" aria-label="Screenshots">
+          {project.images.map((img, i) => (
+            <li key={img.src}>
+              <ProjectShot image={img} first={i === 0} />
+            </li>
+          ))}
+        </ul>
       )}
       {repo && githubLink && (
         <RepoCard

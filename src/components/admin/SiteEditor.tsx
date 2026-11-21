@@ -8,6 +8,7 @@ import {
   TextArea,
   TextField,
 } from "@/components/admin/Fields";
+import { ImageField } from "@/components/admin/ImageField";
 import { ListEditor } from "@/components/admin/ListEditor";
 import { useSaveForm } from "@/components/admin/useSaveForm";
 import { saveSectionAction } from "@/app/(owner)/admin/actions";
@@ -25,6 +26,7 @@ function serialize(site: Site): Site {
     emails: site.emails.map((e) => ({ ...e, label: e.label.trim(), address: e.address.trim() })),
     links: site.links.map((l) => ({ ...l, label: l.label.trim(), href: l.href.trim() })),
     email: site.email.trim(),
+    avatar: site.avatar?.trim() || undefined,
   };
 }
 
@@ -102,6 +104,16 @@ export function SiteEditor({
           path="location"
           value={data.location}
           onChange={(location) => setData({ ...data, location })}
+        />
+        <ImageField
+          label="Profile photo"
+          hint="Shown on your links page instead of your initials. A square photo of your face works best."
+          path="avatar"
+          value={data.avatar ? { src: data.avatar } : undefined}
+          onChange={(next) => setData({ ...data, avatar: next?.src })}
+          csrf={csrf}
+          withAlt={false}
+          shape="square"
         />
         <LinesField
           label="Footer lines"

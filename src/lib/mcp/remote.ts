@@ -32,6 +32,6 @@ export const remoteCall: Call = async (route, init = {}) => {
 
 export function createRemoteServer(): McpServer {
   const server = new McpServer({ name: "site", version: "1.2.0" });
-  registerTools(server, { call: remoteCall, pdf: "embed" });
+  registerTools(server, { call: remoteCall, pdf: "embed", localFiles: false });
   return server;
 }

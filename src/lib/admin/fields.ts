@@ -37,6 +37,8 @@ export const FIELD_LABELS: Record<string, string> = {
   image: "Photo",
   src: "Photo file",
   alt: "Photo description",
+  width: "Photo width",
+  height: "Photo height",
   quote: "Quote",
   org: "Organisation",
   // projects
@@ -112,7 +114,8 @@ const MESSAGES: [RegExp, string][] = [
   [/^Array must contain at least 1 element/, "Add at least one."],
   [/^String must contain at most/, "This is too long."],
   [/^must be at most \d+ bytes$/, "This post is too long."],
-  [/^must be \/hobbies\//, "Photos can't be changed here yet."],
+  [/^must be \/hobbies\//, "This photo isn't one uploaded here. Upload it again."],
+  [/^width and height go together$/, "Upload the photo again."],
 ];
 
 export function friendlyMessage(message: string): string {

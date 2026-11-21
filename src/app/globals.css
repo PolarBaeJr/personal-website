@@ -1878,6 +1878,34 @@
     color: var(--slate);
   }
 
+  .shot-list {
+    display: grid;
+    gap: var(--space-4);
+    max-width: 48rem;
+  }
+
+  .shot-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .shot-frame {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .shot-frame-image {
+    object-fit: contain;
+  }
+
   .quote-list {
     display: grid;
     gap: var(--space-5);
@@ -3099,6 +3127,35 @@
 
   .admin-picker .admin-field {
     flex: 1 1 14rem;
+  }
+
+  .admin-image-frame {
+    position: relative;
+    width: 12rem;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .admin-image-frame--square {
+    aspect-ratio: 1;
+    border-radius: 50%;
+  }
+
+  .admin-image-frame--wide {
+    aspect-ratio: 4 / 3;
+  }
+
+  .admin-image {
+    object-fit: cover;
+  }
+
+  .admin-image-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
   /* Sign-in */

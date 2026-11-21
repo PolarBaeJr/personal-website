@@ -32,8 +32,8 @@ services:
     networks: [edge]
 
     # Secrets and keys live in ../.env, never in git (see ../.env.example):
-    # PostHog, RESUME_API_TOKEN, RESUME_PHONE, RESUME_ADDRESS, OWNER_PASSWORD_HASH, SITE_URL. RESUME_DB and
-    # CONTENT_DB are pinned below to the data volume.
+    # PostHog, RESUME_API_TOKEN, RESUME_PHONE, RESUME_ADDRESS, OWNER_PASSWORD_HASH, SITE_URL.
+    # RESUME_DB, CONTENT_DB and MEDIA_DIR are pinned below to the data volume.
     env_file:
       - path: ../.env
         required: false
@@ -41,6 +41,7 @@ services:
       TZ: ${TZ:-America/Vancouver}
       RESUME_DB: /data/resume.db
       CONTENT_DB: /data/content.db
+      MEDIA_DIR: /data/media
 
     # The dashboard's auto-update copies HostConfig.Mounts when it recreates
     # the container, but not HostConfig.Binds. Compose writes a plain named

@@ -39,6 +39,7 @@ export RESUME_API_URL=http://localhost:3100
 | `update_content(section, data, note, base_version?)` | Saves the whole section as a new version; get it first and send it all back |
 | `restore_content(section, version, note?)` | Copies an earlier version into a new current version |
 | `reset_content_to_seed(section, note?)` | Saves the repo seed (`src/content/*.ts`) as a new version |
+| `upload_image(path \| data_base64 \| url)` | Uploads a photo (a local file, base64, or a public https URL) and returns its `src`, `width` and `height` to put in a section |
 | `list_posts` | Posts (drafts included) and deleted slugs |
 | `get_post(slug, version?)` | A post (current by default) |
 | `create_post(slug, title, date, summary, body, draft?, note?)` | Publishes a new post |

@@ -17,6 +17,8 @@ import { siteOrigin } from "@/lib/site-url";
 // /oauth/authorize (connecting an app) does its redirects here, so they are
 // real 3xx: signed out goes to /login, and a bad request goes back to the
 // app's redirect URI with an error. The page checks again and only renders.
+// /media and /api/media are deliberately not matched: matching would make
+// Next buffer (and cut off at 10 MB) upload bodies.
 export function proxy(request: NextRequest) {
   const [, section, rawSlug] = request.nextUrl.pathname.split("/");
   const token = request.cookies.get(COOKIE_NAME)?.value;

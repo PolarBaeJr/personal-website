@@ -11,6 +11,7 @@ import path from "node:path";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import { fetchImageFromUrl } from "./safe-fetch.ts";
 
 export type Call = (
   route: string,
@@ -22,12 +23,16 @@ export type ToolOptions = {
   // "file" writes preview PDFs to a temp file (local server); "embed"
   // returns them inline as a resource.
   pdf: "file" | "embed";
+  // Whether upload_image may read a local file (the stdio server only; the
+  // remote one must never read the server's filesystem).
+  localFiles: boolean;
 };
 
 // Thrown by call() for problems worth showing as-is (no token, network).
 export class ApiError extends Error {}
 
 const MAX_EMBED_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 const type = z
   .enum(["accounting", "auditing", "finance", "tech", "general"])
@@ -46,12 +51,12 @@ const slug = z
 const note = z.string().max(500).describe("Short description of the change");
 
 const SECTION_GUIDE = `Sections and their shapes (objects are strict: unknown keys are rejected; any item with hidden: true is kept but not shown):
-- site: { tagline, now? ("" hides it), about: string[] (paragraphs), focus: string[] (home facts after the location), email (must be one of emails[].address), emails: [{ label, address, hidden? }], links: [{ label, href, hidden? }], location, footerLines: string[], avatar? ("/file.jpg" in public/) }. The name and description are fixed in code.
+- site: { tagline, now? ("" hides it), about: string[] (paragraphs), focus: string[] (home facts after the location), email (must be one of emails[].address), emails: [{ label, address, hidden? }], links: [{ label, href, hidden? }], location, footerLines: string[], avatar? ("/media/<sha256>.webp" from upload_image, or "/file.jpg" in public/) }. The name and description are fixed in code.
 - home: { projects: slug[] (featured projects, in order; drafts and hidden are skipped), experience: { mode: "all" | "picked", picks: ["Role|Start" keys from the general résumé, e.g. "Internal Events Director|May 2026"] }, balance: { accounting: string[], building: [{ label, href?, hidden? }] } } (the home T-account).
-- about: { competitions: [{ name, role?, result?, start?, end?, href?, hidden? }], clubs: [{ name, role?, start?, end?, href?, hidden? }], hobbies: [{ name, blurb, image?: { src, alt }, hidden? }], testimonials: [{ quote, name, role, org, hidden? }] }. Dates are plain text like "Nov 2026". Testimonials must not contain emails, phone numbers or LinkedIn URLs.
-- projects: { projects: [{ slug, title, summary, description, category: "accounting" | "tech" | "other", tags: string[], links: [{ kind: "live" | "github", href }], draft: boolean (drafts are not shown publicly), hidden?, images?: [{ src, alt }] }] }. Slugs are unique, lowercase words joined by hyphens.
+- about: { competitions: [{ name, role?, result?, start?, end?, href?, hidden? }], clubs: [{ name, role?, start?, end?, href?, hidden? }], hobbies: [{ name, blurb, image?: { src, alt, width?, height? }, hidden? }], testimonials: [{ quote, name, role, org, hidden? }] }. Dates are plain text like "Nov 2026". Testimonials must not contain emails, phone numbers or LinkedIn URLs.
+- projects: { projects: [{ slug, title, summary, description, category: "accounting" | "tech" | "other", tags: string[], links: [{ kind: "live" | "github", href }], draft: boolean (drafts are not shown publicly), hidden?, images?: [{ src, alt, width?, height? }] }] }. Slugs are unique, lowercase words joined by hyphens.
 - socials: { rows: [{ label, href, icon: "globe" | "document" | "linkedin" | "github" | "mail" | "shuttlecock" | "folder", quick? (also a small icon under the name), copy? (text with a copy button), hidden? } or { include: "emails" } (one row per site email)] } (the /socials page, top to bottom).
-Every href is "/..." (on site) or "https://...". Image src is "/hobbies/<file>" or "/media/<sha256>.webp|jpg", and alt is required. Never put the private phone number or address in any section.`;
+Every href is "/..." (on site) or "https://...". Image src is "/media/<sha256>.webp" (from upload_image) or "/hobbies/<file>"; alt is required; copy width and height from upload_image. Never put the private phone number or address in any section.`;
 
 const POST_GUIDE =
   "A post is { title (<=200 chars), date (YYYY-MM-DD), summary (<=500 chars, shown on /blog), body (markdown; raw HTML is shown as text), draft? (drafts are not shown publicly) }.";
@@ -72,6 +77,7 @@ async function httpError(res: Response): Promise<CallToolResult> {
   const body = await res.text();
   let data: {
     error?: string;
+    message?: string;
     reason?: string;
     variant?: string;
     logTail?: string;
@@ -82,6 +88,7 @@ async function httpError(res: Response): Promise<CallToolResult> {
     data = JSON.parse(body);
   } catch {}
   const lines = [`HTTP ${res.status}: ${data.error ?? body.slice(0, 500)}`];
+  if (data.message) lines.push(data.message);
   for (const issue of data.issues ?? []) {
     lines.push(`- ${issue.path || "(root)"}: ${issue.message}`);
   }
@@ -95,6 +102,19 @@ async function httpError(res: Response): Promise<CallToolResult> {
   return failure(lines.join("\n"));
 }
 
+// The same magic bytes the site checks: JPEG, PNG, WebP, and HEIF (which
+// the site answers with its own message). Duplicated because this file
+// can't import from "@/".
+function looksLikeImage(b: Uint8Array): boolean {
+  const ascii = (start: number, end: number) => String.fromCharCode(...b.subarray(start, end));
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return true;
+  const png = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  if (b.length >= 8 && png.every((v, i) => b[i] === v)) return true;
+  if (b.length >= 12 && ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") return true;
+  const heif = ["heic", "heix", "hevc", "hevx", "heim", "heis", "mif1", "msf1", "avif"];
+  return b.length >= 12 && ascii(4, 8) === "ftyp" && heif.includes(ascii(8, 12));
+}
+
 async function guarded(fn: () => Promise<CallToolResult>): Promise<CallToolResult> {
   try {
     return await fn();
@@ -105,7 +125,7 @@ async function guarded(fn: () => Promise<CallToolResult>): Promise<CallToolResul
   }
 }
 
-export function registerTools(server: McpServer, { call, pdf }: ToolOptions): void {
+export function registerTools(server: McpServer, { call, pdf, localFiles }: ToolOptions): void {
   async function getJson(route: string): Promise<CallToolResult> {
     const res = await call(route);
     if (!res.ok) return httpError(res);
@@ -354,6 +374,67 @@ export function registerTools(server: McpServer, { call, pdf }: ToolOptions): vo
     },
     ({ section, note }) =>
       guarded(() => send(`/api/content/${section}/reset`, "POST", { note }, 201)),
+  );
+
+  server.registerTool(
+    "upload_image",
+    {
+      description:
+        "Upload a photo to the site and get back its src, width and height. Give exactly one of path, data_base64 or url. Then set it with get_content + update_content: site.avatar = src (a string); or push { src, alt, width, height } onto projects.projects[i].images; or set about.hobbies[i].image = { src, alt, width, height }. alt is required: a short description of the photo. The photo is resized to at most 2000px, converted to WebP, and all metadata (including location) is removed. " +
+        (localFiles
+          ? "path is a local file on this computer (JPEG, PNG or WebP, up to 15 MB)."
+          : "path doesn't work here; use a public https url, or data_base64 for small images (under about 700 KB)."),
+      inputSchema: {
+        path: z
+          .string()
+          .optional()
+          .describe(localFiles ? "A local image file" : "Not available on this server"),
+        data_base64: z
+          .string()
+          .max(21_000_000)
+          .optional()
+          .describe("The image itself, base64-encoded (a data: URL prefix is fine)"),
+        url: z.string().url().optional().describe("A public https URL of the image"),
+      },
+    },
+    ({ path: file, data_base64, url }) =>
+      guarded(async () => {
+        const given = [file, data_base64, url].filter((v) => v !== undefined);
+        if (given.length !== 1) return failure("Give exactly one of path, data_base64 or url.");
+
+        let bytes: Uint8Array;
+        if (file !== undefined) {
+          if (!localFiles) return failure("path only works with the local MCP server.");
+          let stat;
+          try {
+            stat = await fs.stat(file);
+          } catch {
+            return failure("That file couldn't be found.");
+          }
+          if (!stat.isFile()) return failure("That path isn't a file.");
+          if (stat.size > MAX_IMAGE_BYTES) return failure("That image is over 15 MB.");
+          bytes = await fs.readFile(file);
+        } else if (data_base64 !== undefined) {
+          bytes = Buffer.from(data_base64.replace(/^data:[^,]*;base64,/, ""), "base64");
+          if (bytes.byteLength > MAX_IMAGE_BYTES) return failure("That image is over 15 MB.");
+        } else {
+          try {
+            bytes = await fetchImageFromUrl(url as string, MAX_IMAGE_BYTES);
+          } catch (e) {
+            return failure((e as Error).message);
+          }
+        }
+        if (!looksLikeImage(bytes)) return failure("That isn't a JPEG, PNG or WebP image.");
+
+        const body = new FormData();
+        body.append("file", new Blob([new Uint8Array(bytes)]), "photo");
+        const res = await call("/api/media", { method: "POST", body, timeoutMs: 90_000 });
+        if (res.status !== 201) return httpError(res);
+        return text({
+          ...((await res.json()) as object),
+          next: "Now set it with get_content + update_content (see the description).",
+        });
+      }),
   );
 
   // ---- Blog posts ----
