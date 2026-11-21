@@ -33,6 +33,12 @@ export class ApiError extends Error {}
 
 const MAX_EMBED_BYTES = 4 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+// From src/lib/media/limits.ts (not imported: that folder isn't marked as
+// an ES module for node). The proxy in front of the site refuses bodies over
+// about 1 MB, so bigger photos are shrunk to UPLOAD_TARGET_BYTES first.
+const MAX_EDGE = 2000;
+const MAX_INPUT_PIXELS = 50_000_000;
+const UPLOAD_TARGET_BYTES = 900 * 1024;
 
 const type = z
   .enum(["accounting", "auditing", "finance", "tech", "general"])
@@ -113,6 +119,32 @@ function looksLikeImage(b: Uint8Array): boolean {
   if (b.length >= 12 && ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") return true;
   const heif = ["heic", "heix", "hevc", "hevx", "heim", "heis", "mif1", "msf1", "avif"];
   return b.length >= 12 && ascii(4, 8) === "ftyp" && heif.includes(ascii(8, 12));
+}
+
+// A JPEG with the long edge at most MAX_EDGE and at most UPLOAD_TARGET_BYTES,
+// or the bytes as they are when they already fit or sharp can't read them
+// (the site then answers with its own message).
+async function shrinkImage(bytes: Uint8Array): Promise<Uint8Array> {
+  const sharp = (await import("sharp")).default;
+  try {
+    const meta = await sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS }).metadata();
+    const long = Math.max(meta.width ?? 0, meta.height ?? 0);
+    if (bytes.byteLength <= UPLOAD_TARGET_BYTES && long <= MAX_EDGE) return bytes;
+    let edge = Math.min(MAX_EDGE, long);
+    for (let step = 0; step < 12; step++) {
+      for (const quality of step === 0 ? [86, 78, 70, 60] : [60]) {
+        const out = await sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS })
+          .rotate()
+          .resize({ width: edge, height: edge, fit: "inside", withoutEnlargement: true })
+          .flatten({ background: "#ffffff" })
+          .jpeg({ quality })
+          .toBuffer();
+        if (out.byteLength <= UPLOAD_TARGET_BYTES) return new Uint8Array(out);
+      }
+      edge = Math.max(1, Math.round(edge * 0.8));
+    }
+  } catch {}
+  return bytes;
 }
 
 async function guarded(fn: () => Promise<CallToolResult>): Promise<CallToolResult> {
@@ -380,7 +412,7 @@ export function registerTools(server: McpServer, { call, pdf, localFiles }: Tool
     "upload_image",
     {
       description:
-        "Upload a photo to the site and get back its src, width and height. Give exactly one of path, data_base64 or url. Then set it with get_content + update_content: site.avatar = src (a string); or push { src, alt, width, height } onto projects.projects[i].images; or set about.hobbies[i].image = { src, alt, width, height }. alt is required: a short description of the photo. The photo is resized to at most 2000px, converted to WebP, and all metadata (including location) is removed. " +
+        "Upload a photo to the site and get back its src, width and height. Give exactly one of path, data_base64 or url. Then set it with get_content + update_content: site.avatar = src (a string); or push { src, alt, width, height } onto projects.projects[i].images; or set about.hobbies[i].image = { src, alt, width, height }. alt is required: a short description of the photo. The photo is resized to at most 2000px, converted to WebP, and all metadata (including location) is removed. With path or url, photos are shrunk automatically to fit the upload limit. " +
         (localFiles
           ? "path is a local file on this computer (JPEG, PNG or WebP, up to 15 MB)."
           : "path doesn't work here; use a public https url, or data_base64 for small images (under about 700 KB)."),
@@ -425,6 +457,7 @@ export function registerTools(server: McpServer, { call, pdf, localFiles }: Tool
           }
         }
         if (!looksLikeImage(bytes)) return failure("That isn't a JPEG, PNG or WebP image.");
+        if (data_base64 === undefined) bytes = await shrinkImage(bytes);
 
         const body = new FormData();
         body.append("file", new Blob([new Uint8Array(bytes)]), "photo");

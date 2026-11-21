@@ -6,20 +6,30 @@ import { TextField } from "@/components/admin/Fields";
 import { useIssue } from "@/components/admin/FormIssues";
 import { SortableList } from "@/components/admin/SortableList";
 import { NOT_REACHED, SIGNED_OUT } from "@/lib/admin/form-state";
-import { MAX_UPLOAD_BYTES } from "@/lib/media/limits";
+import { MAX_EDGE, MAX_ORIGINAL_BYTES, UPLOAD_TARGET_BYTES } from "@/lib/media/limits";
 
 // Photo fields for the editors. A chosen file goes straight to /api/media
 // (never with the editor's form, which has a 1 MB cap); the field then holds
-// the returned src, width and height until the editor is saved.
+// the returned src, width and height until the editor is saved. The proxy
+// in front of the site refuses bodies over about 1 MB, so photos are shrunk
+// on the device first.
 
 export type ImageValue = { src: string; alt?: string; width?: number; height?: number };
 export type ListImage = ImageValue & { alt: string };
 
 type Uploaded = { src: string; width: number; height: number };
 
-type UploadState = { kind: "idle" } | { kind: "uploading" } | { kind: "error"; message: string };
+type UploadState =
+  | { kind: "idle" }
+  | { kind: "preparing" }
+  | { kind: "uploading" }
+  | { kind: "error"; message: string };
 
-const TOO_BIG = "That photo is over 15 MB. Pick a smaller one.";
+const TOO_BIG = "That photo is over 40 MB. Pick a smaller one.";
+const TOO_LARGE = "That photo is too large to upload. Try a smaller one.";
+const UNREADABLE = "This photo couldn't be read here. Try a JPEG or PNG.";
+const PASS_THROUGH = ["image/jpeg", "image/png", "image/webp"];
+const QUALITIES = [0.86, 0.78, 0.7, 0.6];
 const ALT_HINT =
   "Required. A few words for people who can't see it, like 'Presenting at the case competition'.";
 
@@ -33,11 +43,94 @@ function useLatest<T>(value: T) {
   return ref;
 }
 
+type Decoded = { source: CanvasImageSource; width: number; height: number; close: () => void };
+
+async function decode(file: File): Promise<Decoded | null> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
+  } catch {}
+  const url = URL.createObjectURL(file);
+  try {
+    const img = document.createElement("img");
+    img.src = url;
+    await img.decode();
+    return {
+      source: img,
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+      close: () => URL.revokeObjectURL(url),
+    };
+  } catch {
+    URL.revokeObjectURL(url);
+    return null;
+  }
+}
+
+function draw(image: Decoded, width: number, height: number) {
+  if (typeof OffscreenCanvas !== "undefined") {
+    const canvas = new OffscreenCanvas(width, height);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    // JPEG has no transparency; white beats black behind a transparent PNG.
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(image.source, 0, 0, width, height);
+    return (quality: number) => canvas.convertToBlob({ type: "image/jpeg", quality });
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(image.source, 0, 0, width, height);
+  return (quality: number) =>
+    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+}
+
+// A JPEG of the photo with its long edge at most MAX_EDGE and its size at
+// most UPLOAD_TARGET_BYTES, or the file itself when it already fits. The
+// re-encode drops EXIF; the server strips metadata again anyway.
+async function shrink(file: File): Promise<Blob | null> {
+  const image = await decode(file);
+  if (!image) return null;
+  try {
+    const long = Math.max(image.width, image.height);
+    if (!long) return null;
+    if (PASS_THROUGH.includes(file.type) && file.size <= UPLOAD_TARGET_BYTES && long <= MAX_EDGE) {
+      return file;
+    }
+    let scale = Math.min(1, MAX_EDGE / long);
+    for (let step = 0; step < 12; step++) {
+      const encode = draw(
+        image,
+        Math.max(1, Math.round(image.width * scale)),
+        Math.max(1, Math.round(image.height * scale)),
+      );
+      if (!encode) return null;
+      // Lower quality first at full size, then only the lowest when smaller.
+      for (const quality of step === 0 ? QUALITIES : QUALITIES.slice(-1)) {
+        const blob = await encode(quality);
+        if (!blob) return null;
+        if (blob.size <= UPLOAD_TARGET_BYTES) return blob;
+      }
+      scale *= 0.8;
+    }
+    return null;
+  } catch {
+    return null;
+  } finally {
+    image.close();
+  }
+}
+
 function useImageUpload(csrf: string) {
   const [state, setState] = useState<UploadState>({ kind: "idle" });
 
   async function upload(file: File): Promise<Uploaded | null> {
-    if (file.size > MAX_UPLOAD_BYTES) {
+    if (file.size > MAX_ORIGINAL_BYTES) {
       setState({ kind: "error", message: TOO_BIG });
       return null;
     }
@@ -45,10 +138,16 @@ function useImageUpload(csrf: string) {
       setState({ kind: "error", message: "That isn't a photo." });
       return null;
     }
+    setState({ kind: "preparing" });
+    const photo = await shrink(file);
+    if (!photo) {
+      setState({ kind: "error", message: UNREADABLE });
+      return null;
+    }
     setState({ kind: "uploading" });
     // The original file name never leaves the device.
     const body = new FormData();
-    body.append("file", file, "photo");
+    body.append("file", photo, "photo");
     let res: Response;
     try {
       res = await fetch("/api/media", {
@@ -62,17 +161,23 @@ function useImageUpload(csrf: string) {
       return null;
     }
     if (res.status === 201) {
-      const done = (await res.json()) as Uploaded;
-      setState({ kind: "idle" });
-      return done;
+      const done = (await res.json().catch(() => null)) as Uploaded | null;
+      if (done && typeof done.src === "string") {
+        setState({ kind: "idle" });
+        return done;
+      }
+      setState({ kind: "error", message: "The photo couldn't be saved. Try again." });
+      return null;
     }
     let message: string;
     if (res.status === 401 || res.status === 403) {
       message = SIGNED_OUT;
-    } else if (res.status === 413 || res.status === 415 || res.status === 400) {
-      const data = (await res.json().catch(() => ({}))) as { message?: string };
+    } else if (res.status === 413) {
+      message = TOO_LARGE;
+    } else if (res.status === 415 || res.status === 400) {
+      const data = (await res.json().catch(() => null)) as { message?: unknown } | null;
       message =
-        data.message ?? (res.status === 413 ? TOO_BIG : "That file couldn't be read as a photo.");
+        typeof data?.message === "string" ? data.message : "That file couldn't be read as a photo.";
     } else if (res.status === 503) {
       message = "The site is busy with another photo. Try again in a moment.";
     } else {
@@ -99,7 +204,7 @@ function UploadButton({
   onFile: (file: File) => void;
 }) {
   const input = useRef<HTMLInputElement>(null);
-  const busy = state.kind === "uploading";
+  const busy = state.kind === "preparing" || state.kind === "uploading";
   return (
     <>
       {/* No name: the file must never go with the editor's form. */}
@@ -122,7 +227,7 @@ function UploadButton({
         disabled={busy}
         onClick={() => input.current?.click()}
       >
-        {busy ? "Uploading…" : label}
+        {state.kind === "preparing" ? "Preparing…" : busy ? "Uploading…" : label}
       </button>
     </>
   );
@@ -132,7 +237,11 @@ function UploadStatus({ state }: { state: UploadState }) {
   return (
     <>
       <p className="admin-hint" role="status" aria-live="polite">
-        {state.kind === "uploading" ? "Uploading the photo…" : ""}
+        {state.kind === "preparing"
+          ? "Preparing the photo…"
+          : state.kind === "uploading"
+            ? "Uploading the photo…"
+            : ""}
       </p>
       {state.kind === "error" && <p className="admin-error">{state.message}</p>}
     </>
